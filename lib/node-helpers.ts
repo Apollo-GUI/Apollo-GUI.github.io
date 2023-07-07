@@ -20,8 +20,10 @@ export function getDefaultData(type: ApolloNodeType) {
       };
     case "parallel":
       return {
-        name: "parallel",
+        name: "",
         type: "string",
+        dataOuts: [],
+        dataIns: [],
       };
     default:
       return {

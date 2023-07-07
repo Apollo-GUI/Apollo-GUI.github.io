@@ -10,12 +10,14 @@ import ReactFlow, {
   OnEdgesChange,
   addEdge,
   Connection,
+  useReactFlow,
 } from "reactflow";
 import { getDefaultData } from "../lib/node-helpers";
 import { ApolloNodeType, DataIn } from "../src/types";
 import FunctionNode from "./nodes/function-node";
 import StartNode from "./nodes/start-node";
 import EndNode from "./nodes/end-node";
+import ParallelNode from "./nodes/parallel-node";
 
 let id = 1;
 const getId = () => `${id++}`;
@@ -44,8 +46,16 @@ export default function FlowView({
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const [reactFlowInstance, setReactFlowInstance] =
     useState<ReactFlowInstance | null>(null);
-
-  const nodeTypes = useMemo(() => ({ start:StartNode, function: FunctionNode, end:EndNode }), []);
+  const { getIntersectingNodes } = useReactFlow();
+  const nodeTypes = useMemo(
+    () => ({
+      start: StartNode,
+      function: FunctionNode,
+      parallel: ParallelNode,
+      end: EndNode,
+    }),
+    []
+  );
 
   const onConnect = useCallback(
     (params: Connection) => {
@@ -62,7 +72,10 @@ export default function FlowView({
             currentInputs.name === source.data.dataOuts[inputIndex].name
         )
       ) {
-        const input = source.data.dataOuts[inputIndex];
+        const input =
+          source.type === "parallel"
+            ? source.data.dataIns[inputIndex]
+            : source.data.dataOuts[inputIndex];
         updateNode(target.id, {
           ...target.data,
           dataIns: [
@@ -80,6 +93,59 @@ export default function FlowView({
     event.preventDefault();
     event.dataTransfer!.dropEffect = "move";
   }, []);
+
+  const onNodeDrag = useCallback(
+    (_: React.MouseEvent, node: Node) => {
+      const intersections = getIntersectingNodes(node).map((n) => n.id);
+
+      setNodes((ns) =>
+        ns.map((n) => ({
+          ...n,
+          className:
+            intersections.includes(n.id) && n.type === "parallel"
+              ? "shadow-[0_0_50px_15px_rgba(0,0,0,0.3)] rounded-lg"
+              : "",
+        }))
+      );
+    },
+    [getIntersectingNodes, setNodes]
+  );
+
+  const onNodeDragStop = useCallback(
+    (_: React.MouseEvent, node: Node) => {
+      const intersections = getIntersectingNodes(node);
+      const intersectedParallel = intersections.find(
+        (n) => n.type === "parallel"
+      );
+      if (intersectedParallel) {
+        setNodes((ns) =>
+          ns.map((n) => {
+            if (n.id === intersectedParallel.id) {
+              return {
+                ...n,
+                className: "",
+              };
+            }
+            if (n.id === node.id) {
+              return {
+                ...n,
+                parentNode: intersectedParallel.id,
+                extent: "parent",
+                ...(n.parentNode !== intersectedParallel.id && {
+                  position: {
+                    x: n.position.x - intersectedParallel.position.x,
+                    y: n.position.y - intersectedParallel.position.y,
+                  },
+                }),
+              };
+            }
+            return n;
+          })
+        );
+      }
+    },
+    [setNodes, getIntersectingNodes]
+  );
 
   const onDrop = useCallback(
     (event: React.DragEvent<HTMLDivElement>) => {
@@ -122,6 +188,8 @@ export default function FlowView({
         onConnect={onConnect}
         onInit={setReactFlowInstance}
         onDrop={onDrop}
+        onNodeDrag={onNodeDrag}
+        onNodeDragStop={onNodeDragStop}
         onDragOver={onDragOver}
         fitView
         proOptions={{ hideAttribution: true }}

@@ -91,3 +91,12 @@ export type EndNode = {
   name: string;
   dataIns: DataIn[];
 };
+
+export type ParallelNode = {
+  name: string;
+  dataIns: DataIn[];
+  dataOuts: DataOut[];
+  properties?: Properties[];
+  constraints?: Constraints[];
+  iterator: Iterator;
+};
