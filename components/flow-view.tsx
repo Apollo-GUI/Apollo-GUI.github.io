@@ -11,6 +11,7 @@ import ReactFlow, {
   addEdge,
   Connection,
   useReactFlow,
+  useUpdateNodeInternals,
 } from "reactflow";
 import { getDefaultData } from "../lib/node-helpers";
 import { ApolloNodeType, DataIn } from "../src/types";
@@ -18,6 +19,7 @@ import FunctionNode from "./nodes/function-node";
 import StartNode from "./nodes/start-node";
 import EndNode from "./nodes/end-node";
 import ParallelNode from "./nodes/parallel-node";
+import IfNode from "./nodes/if-node";
 
 let id = 1;
 const getId = () => `${id++}`;
@@ -47,11 +49,13 @@ export default function FlowView({
   const [reactFlowInstance, setReactFlowInstance] =
     useState<ReactFlowInstance | null>(null);
   const { getIntersectingNodes } = useReactFlow();
+  const updateNodeInternals = useUpdateNodeInternals();
   const nodeTypes = useMemo(
     () => ({
       start: StartNode,
       function: FunctionNode,
       parallel: ParallelNode,
+      if: IfNode,
       end: EndNode,
     }),
     []
@@ -59,34 +63,50 @@ export default function FlowView({
 
   const onConnect = useCallback(
     (params: Connection) => {
-      if (params.source === params.target) return;
       const source = nodes.find((n) => n.id === params.source);
       const target = nodes.find((n) => n.id === params.target);
+      if (source?.id === target?.id && target?.type !== "parallel") return;
+
       const inputIndex = Number(params.sourceHandle?.substring(1));
-      if (
-        source &&
-        target &&
-        !isNaN(inputIndex) &&
-        !target.data.dataIns?.find(
-          (currentInputs: DataIn) =>
-            currentInputs.name === source.data.dataOuts[inputIndex].name
-        )
-      ) {
+      if (source && target && !isNaN(inputIndex)) {
         const input =
-          source.type === "parallel"
+          source.type === "parallel" && !params.sourceHandle?.startsWith("o")
             ? source.data.dataIns[inputIndex]
             : source.data.dataOuts[inputIndex];
-        updateNode(target.id, {
-          ...target.data,
-          dataIns: [
-            ...(target.data.dataIns ?? []),
-            { name: input.name, source: source.data.name + "/" + input.name },
-          ],
-        });
+        if (
+          !target.data.dataIns?.find(
+            (currentInputs: DataIn) => currentInputs.name === input.name
+          )
+        ) {
+          if (target.type === "parallel" && params.targetHandle==="oidefault") {
+            updateNode(target.id, {
+              ...target.data,
+              dataOuts: [
+                ...(target.data.dataOuts ?? []),
+                {
+                  name: input.name,
+                  source: source.data.name + "/" + input.name,
+                },
+              ],
+            });
+          } else {
+            updateNode(target.id, {
+              ...target.data,
+              dataIns: [
+                ...(target.data.dataIns ?? []),
+                {
+                  name: input.name,
+                  source: source.data.name + "/" + input.name,
+                },
+              ],
+            });
+          }
+          updateNodeInternals(target.id);
+        }
       }
       setEdges((eds) => addEdge(params, eds));
     },
-    [setEdges, nodes, updateNode]
+    [nodes, setEdges, updateNode, updateNodeInternals]
   );
 
   const onDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
@@ -166,6 +186,8 @@ export default function FlowView({
         id: getId(),
         type: type,
         position,
+        style:
+          type == "parallel" ? { height: "200px", width: "200px" } : undefined,
         data: getDefaultData(type as ApolloNodeType),
       } as Node;
 

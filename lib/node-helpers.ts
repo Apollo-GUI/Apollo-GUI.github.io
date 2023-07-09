@@ -2,6 +2,7 @@ import { Node } from "reactflow";
 import { ApolloNodeType } from "../src/types";
 import StartNodeDetails from "../components/start-node-details";
 import FunctionNodeDetails from "../components/function-node-details";
+import EndNodeDetails from "../components/end-node-details";
 
 export function getDefaultData(type: ApolloNodeType) {
   switch (type) {
@@ -14,11 +15,18 @@ export function getDefaultData(type: ApolloNodeType) {
       return {
         name: "",
         type: "string",
-        value:"",
+        value: "",
         dataOuts: [],
         dataIns: [],
       };
     case "parallel":
+      return {
+        name: "",
+        type: "string",
+        dataOuts: [],
+        dataIns: [],
+      };
+    case "if":
       return {
         name: "",
         type: "string",
@@ -39,5 +47,7 @@ export function getDetailsComponentFromNode(node: Node) {
       return StartNodeDetails;
     case "function":
       return FunctionNodeDetails;
+    case "end":
+      return EndNodeDetails;
   }
 }

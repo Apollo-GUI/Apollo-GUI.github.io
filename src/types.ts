@@ -100,3 +100,12 @@ export type ParallelNode = {
   constraints?: Constraints[];
   iterator: Iterator;
 };
+
+export type IfNode = {
+  name: string;
+  dataIns: DataIn[];
+  dataOuts: DataOut[];
+  properties?: Properties[];
+  constraints?: Constraints[];
+  condition: Condition;
+};

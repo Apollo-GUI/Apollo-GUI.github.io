@@ -31,10 +31,12 @@ export default function Editor() {
     );
   };
 
-  const DetailsComponent =
-    selectedNodeIndex !== -1
-      ? getDetailsComponentFromNode(nodes[selectedNodeIndex])
-      : null;
+  const selectedNode = selectedNodeIndex !== -1
+  ? nodes[selectedNodeIndex] : null
+
+  const DetailsComponent = selectedNode?
+     getDetailsComponentFromNode(selectedNode)
+      : undefined;
 
   return (
     <>
@@ -60,9 +62,9 @@ export default function Editor() {
             selectedNodeIndex !== -1 && "right-0"
           )}
         >
-          {DetailsComponent && (
+          {(selectedNode && DetailsComponent) && (
             <DetailsComponent
-              selectedNode={nodes[selectedNodeIndex]}
+              selectedNode={selectedNode}
               updateNode={onNodeUpdate}
               close={() => setSelectedNodeIndex(-1)}
             />
