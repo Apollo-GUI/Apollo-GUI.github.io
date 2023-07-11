@@ -6,6 +6,11 @@ import {
   getDefaultData,
   getDetailsComponentFromNode,
 } from "../lib/node-helpers";
+import { Workflow } from "../src/types";
+
+export interface EditorProps{
+  selectedWorkflow: Workflow;
+}
 
 const initialStartNode = {
   id: "0",
@@ -14,9 +19,10 @@ const initialStartNode = {
   data: getDefaultData("start"),
 } as Node;
 
-export default function Editor() {
-  const [nodes, setNodes, onNodesChange] = useNodesState([initialStartNode]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+export default function Editor({selectedWorkflow}:EditorProps) {
+
+  const [nodes, setNodes, onNodesChange] = useNodesState(selectedWorkflow.data?.nodes ?? [initialStartNode]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(selectedWorkflow.data?.edges ??[]);
 
   const [selectedNodeIndex, setSelectedNodeIndex] = useState<number>(-1);
 

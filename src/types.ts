@@ -109,3 +109,10 @@ export type IfNode = {
   constraints?: Constraints[];
   condition: Condition;
 };
+
+export type Workflow = {
+  id:string;
+  name: string;
+  lastSaved: Date | null;
+  data: any;
+}

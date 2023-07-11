@@ -20,9 +20,7 @@ import StartNode from "./nodes/start-node";
 import EndNode from "./nodes/end-node";
 import ParallelNode from "./nodes/parallel-node";
 import IfNode from "./nodes/if-node";
-
-let id = 1;
-const getId = () => `${id++}`;
+import { uuidv4 } from "../lib/utils";
 
 interface FlowViewProps {
   nodes: Node[];
@@ -183,7 +181,7 @@ export default function FlowView({
         y: event.clientY - (reactFlowBounds?.top ?? 0),
       });
       const newNode = {
-        id: getId(),
+        id: uuidv4(),
         type: type,
         position,
         style:
