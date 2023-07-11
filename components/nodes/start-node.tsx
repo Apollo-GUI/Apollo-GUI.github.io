@@ -12,7 +12,7 @@ export default function StartNode({ data }: NodeProps<StartNode>) {
           Start
         </div>
         <div className="text-sm text-slate-800 font-semibold">
-          {data.name.length ? data.name : "workflow name"}
+          {data.name.length ? data.name : "new workflow"}
         </div>
       </div>
       <Separator />

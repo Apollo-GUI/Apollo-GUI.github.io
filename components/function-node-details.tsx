@@ -16,6 +16,7 @@ import { DataOut, dataTypes, DataIn } from "../src/types";
 export interface NodeDetailsProps {
   selectedNode: Node;
   updateNode: (nodeId: string, data: any) => void;
+  updateSelectedWorkflowName: (name: string) => void;
   close: () => void;
 }
 export default function FunctionNodeDetails({

@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 
-export default function SettingsMenu({ selectedWorkflow }: EditorProps) {
+export default function SettingsMenu({ selectedWorkflow, setSelectedWorkflow }: EditorProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -41,7 +41,7 @@ export default function SettingsMenu({ selectedWorkflow }: EditorProps) {
           <DropdownMenuItem>Import Graph</DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => window.location.replace("/")}>
+        <DropdownMenuItem onClick={() =>setSelectedWorkflow(null)}>
           Back to Dashboard
         </DropdownMenuItem>
       </DropdownMenuContent>

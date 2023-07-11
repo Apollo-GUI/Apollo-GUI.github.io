@@ -1,4 +1,4 @@
-import { AlignVerticalJustifyCenter, Circle, CircleDot, Cog, Copy, FunctionSquare, Github, Info, Minus, MinusCircle, MoreHorizontal, Plus, RotateCcw, Save, Settings, Split, Trash2, X } from "lucide-react";
+import { AlignVerticalJustifyCenter, Circle, CircleDot, Copy, FunctionSquare, Github, Import, Info, MinusCircle, MoreHorizontal, Plus, RotateCcw, Save, Settings, Split, Trash2, X } from "lucide-react";
 import { Orbit } from "lucide-react";
 import { LucideIcon } from "lucide-react";
 import { ApolloNodeType } from "../src/types";
@@ -26,4 +26,5 @@ export const Icons = {
   format: AlignVerticalJustifyCenter,
   options: MoreHorizontal,
   github: Github,
+  import: Import,
 };

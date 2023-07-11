@@ -23,7 +23,8 @@ export default function WorkflowActions() {
       <DropdownMenuContent align="end" className="w-[160px]">
         <DropdownMenuItem>Edit</DropdownMenuItem>
         <DropdownMenuItem>Make a copy</DropdownMenuItem>
-        <DropdownMenuItem>Favorite</DropdownMenuItem>
+        <DropdownMenuItem>Export Apollo Yaml</DropdownMenuItem>
+        <DropdownMenuItem>Download Graph</DropdownMenuItem>
 
         <DropdownMenuSeparator />
         <DropdownMenuItem>Delete</DropdownMenuItem>

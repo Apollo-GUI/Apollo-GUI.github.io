@@ -1,9 +1,5 @@
 lockfileVersion: '6.0'
 
-settings:
-  autoInstallPeers: true
-  excludeLinksFromLockfile: false
-
 dependencies:
   '@radix-ui/react-alert-dialog':
     specifier: ^1.0.4
@@ -71,9 +67,6 @@ dependencies:
   lucide-react:
     specifier: ^0.256.0
     version: 0.256.0(react@18.2.0)
-  prettier:
-    specifier: ^3.0.0
-    version: 3.0.0
   react:
     specifier: ^18.2.0
     version: 18.2.0
@@ -121,6 +114,9 @@ devDependencies:
   postcss:
     specifier: ^8.4.24
     version: 8.4.24
+  prettier:
+    specifier: ^3.0.0
+    version: 3.0.0
   tailwindcss:
     specifier: ^3.3.2
     version: 3.3.2
@@ -3178,7 +3174,7 @@ packages:
     resolution: {integrity: sha512-zBf5eHpwHOGPC47h0zrPyNn+eAEIdEzfywMoYn2XPi0P44Zp0tSq64rq0xAREh4auw2cJZHo9QUob+NqCQky4g==}
     engines: {node: '>=14'}
     hasBin: true
-    dev: false
+    dev: true
 
   /punycode@2.3.0:
     resolution: {integrity: sha512-rRV+zQD8tVFys26lAGR9WUuS4iUAngJScM+ZRSKtvl5tKeZ2t5bvdNFdNHBW9FWR4guGHlgmsZ1G7BSm2wTbuA==}
@@ -3650,3 +3646,7 @@ packages:
       react: 18.2.0
       use-sync-external-store: 1.2.0(react@18.2.0)
     dev: false
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false

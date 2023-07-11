@@ -23,7 +23,7 @@ import {
 import WorkflowActions from "../components/workflow-actions";
 import { WORKFLOW_KEY_PREFIX, getDateTimeString, uuidv4 } from "../lib/utils";
 
-import logo from "../public/apollo_logo.png";
+import logo from "./apollo_logo.png";
 import { Workflow } from "./types";
 
 interface HomeProps {
@@ -40,21 +40,38 @@ export default function Home({ selectWorkflow }: HomeProps) {
   }
 
   const addWorkflow = () =>
-    selectWorkflow({id:WORKFLOW_KEY_PREFIX+uuidv4(), name: "new workflow", lastSaved: null, data: null });
+    selectWorkflow({
+      id: WORKFLOW_KEY_PREFIX + uuidv4(),
+      name: "new workflow",
+      lastSaved: null,
+      data: null,
+    });
 
   return (
     <div className="flex">
-      <aside className="w-[80px] min-w-[80px] min-h-screen text-center bg-slate-900">
+      <aside className="flex flex-col gap-4 w-[80px] min-w-[80px] min-h-screen text-center bg-slate-900">
         <Icons.logo className="h-12 w-12 mx-auto mt-10 text-amber-400" />
         <TooltipProvider delayDuration={300}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button size={"icon"} className="mb-4 mt-8" onClick={addWorkflow}>
+              <Button size={"icon"} className="mb-4 mt-6 mx-auto" onClick={addWorkflow}>
                 <Icons.add className="h-12 w-12" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>
               <p>Add new workflow</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <TooltipProvider delayDuration={300}>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button size={"icon"} className="mx-auto" onClick={addWorkflow}>
+                <Icons.import className="h-12 w-12" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Import a workflow</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -117,10 +134,16 @@ export default function Home({ selectWorkflow }: HomeProps) {
           <Card className="col-span-2">
             <CardHeader className="flex flex-row justify-between items-center">
               <CardTitle>Saved Workflows</CardTitle>
-              <Button variant="outline" onClick={addWorkflow}>
-                <Icons.add className="mr-2 h-4 w-4" />
-                New workflow
-              </Button>
+              <div className="space-x-2">
+                <Button variant="outline" onClick={addWorkflow}>
+                  <Icons.add className="mr-2 h-4 w-4" />
+                  New workflow
+                </Button>
+                <Button variant="outline" onClick={addWorkflow}>
+                  <Icons.import className="mr-2 h-4 w-4" />
+                  Import workflow
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="rounded-md border">
@@ -135,12 +158,18 @@ export default function Home({ selectWorkflow }: HomeProps) {
                   <TableBody>
                     {workflows.length ? (
                       workflows.map((workflow, idx) => (
-                        <TableRow key={idx} onClick={()=>window.location.replace("/"+workflow.id)}>
+                        <TableRow
+                          key={idx}
+                          onClick={() => selectWorkflow(workflow)}
+                          className="cursor-pointer"
+                        >
                           <TableCell className="font-medium">
                             {workflow.name}
                           </TableCell>
                           <TableCell>
-                            {workflow.lastSaved? getDateTimeString(workflow.lastSaved) : "-"}
+                            {workflow.lastSaved
+                              ? getDateTimeString(workflow.lastSaved)
+                              : "-"}
                           </TableCell>
                           <TableCell className="w-[200px] text-right">
                             <WorkflowActions />

@@ -16,6 +16,7 @@ import { NodeDetailsProps } from "./function-node-details";
 export default function StartNodeDetails({
   selectedNode,
   updateNode,
+  updateSelectedWorkflowName,
   close,
 }: NodeDetailsProps) {
   return (
@@ -39,12 +40,13 @@ export default function StartNodeDetails({
           id="name"
           type="text"
           placeholder="name"
-          onChange={(e) =>
+          onChange={(e) => {
             updateNode(selectedNode.id, {
               ...selectedNode.data,
               name: e.target.value,
-            })
-          }
+            });
+            updateSelectedWorkflowName(e.target.value);
+          }}
           value={selectedNode.data.name}
         />
       </div>
@@ -104,7 +106,7 @@ export default function StartNodeDetails({
                   updateNode(selectedNode.id, {
                     ...selectedNode.data,
                     dataOuts: selectedNode.data.dataOuts.filter(
-                      (_: DataOut, index: number) => index !== idx
+                      (_: DataOut, index: number) => index !== idx,
                     ),
                   })
                 }

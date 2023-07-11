@@ -6,7 +6,10 @@ import { Icons } from "./icons";
 import SaveButton from "./save-button";
 import SettingsMenu from "./settings-menu";
 
-export default function NavRail({selectedWorkflow}:EditorProps) {
+export default function NavRail({
+  selectedWorkflow,
+  setSelectedWorkflow,
+}: EditorProps) {
   const onDragStart = (
     event: React.DragEvent<HTMLDivElement>,
     nodeType: ApolloNodeType
@@ -15,9 +18,12 @@ export default function NavRail({selectedWorkflow}:EditorProps) {
     if (event.dataTransfer) event.dataTransfer.effectAllowed = "move";
   };
   return (
-        <aside className="flex flex-col justify-between items-center w-[80px] min-w-[80px] min-h-screen text-center bg-slate-900">
+    <aside className="flex flex-col justify-between items-center w-[80px] min-w-[80px] min-h-screen text-center bg-slate-900">
       <nav className="grid gap-4  text-white">
-        <Icons.logo className="h-12 w-12 mx-auto mt-10 mb-5 text-amber-400 cursor-pointer" onClick={()=>window.location.replace("/")}/>
+        <Icons.logo
+          className="h-12 w-12 mx-auto mt-10 mb-5 text-amber-400 cursor-pointer"
+          onClick={() => setSelectedWorkflow(null)}
+        />
         <DraggableElement node="function" onNodeDrag={onDragStart} />
         <DraggableElement node="parallel" onNodeDrag={onDragStart} />
         <DraggableElement node="if" onNodeDrag={onDragStart} />
@@ -25,9 +31,15 @@ export default function NavRail({selectedWorkflow}:EditorProps) {
         <DraggableElement node="end" onNodeDrag={onDragStart} />
       </nav>
       <div className="flex flex-col">
-      <FormatButton />
-      <SaveButton selectedWorkflow={selectedWorkflow}/>
-      <SettingsMenu selectedWorkflow={selectedWorkflow}/>
+        <FormatButton />
+        <SaveButton
+          selectedWorkflow={selectedWorkflow}
+          setSelectedWorkflow={setSelectedWorkflow}
+        />
+        <SettingsMenu
+          selectedWorkflow={selectedWorkflow}
+          setSelectedWorkflow={setSelectedWorkflow}
+        />
       </div>
     </aside>
   );
