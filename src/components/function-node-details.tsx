@@ -13,6 +13,7 @@ import {
 } from "./ui/select";
 import { Node } from "reactflow";
 import { DataOut, dataTypes, DataIn } from "@/types";
+import BaseDetailsSheet from "./base-details-sheet";
 export interface NodeDetailsProps {
   selectedNode: Node;
   updateNode: (nodeId: string, data: any) => void;
@@ -25,32 +26,21 @@ export default function FunctionNodeDetails({
   close,
 }: NodeDetailsProps) {
   const staticInputs = selectedNode.data.dataIns?.filter(
-    (i: DataIn) => i.source === undefined
+    (i: DataIn) => i.source === undefined,
   );
   const parentInputs = selectedNode.data.dataIns?.filter(
-    (i: DataIn) => i.source !== undefined
+    (i: DataIn) => i.source !== undefined,
   );
 
   const staticInputsOffset =
     selectedNode.data.dataIns?.length - staticInputs?.length;
   return (
-    <>
-      <div className="flex justify-between items-center mr-12">
-        <div className="text-slate-500">
-          <h1 className="text-lg font-semibold text-foreground">Function</h1>
-          Here you can edith the attributes of the selected node
-        </div>
-        <Button variant={"destructive"}>
-          <Icons.trash className="w-4 h-4" />
-        </Button>
-      </div>
-      <div
-        className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary"
-        onClick={close}
-      >
-        <Icons.close className="h-4 w-4" />
-        <span className="sr-only">Close</span>
-      </div>
+    <BaseDetailsSheet
+      title="Function"
+      description="Here you can edith the attributes of the selected node"
+      close={close}
+      selectedNode={selectedNode}
+    >
       <div className="grid gap-2 mt-4">
         <Label htmlFor="name">Name</Label>
         <Input
@@ -84,15 +74,25 @@ export default function FunctionNodeDetails({
       </p>
       {parentInputs.length > 0 && (
         <>
-          <h1 className="text-sm font-medium leading-none mt-4">Input from parents</h1>
-      {parentInputs.map((input: DataIn, idx: number) => (
-        <div key={idx.toString()} className="flex items-center justify-between">
-          <p>{input.source}</p>
-          <Button type="button" variant="ghost" size="icon">
-            <Icons.remove className="w-5 text-destructive" strokeWidth={2} />
-          </Button>
-        </div>
-      ))}</>)}
+          <h1 className="text-sm font-medium leading-none mt-4">
+            Input from parents
+          </h1>
+          {parentInputs.map((input: DataIn, idx: number) => (
+            <div
+              key={idx.toString()}
+              className="flex items-center justify-between"
+            >
+              <p>{input.source}</p>
+              <Button type="button" variant="ghost" size="icon">
+                <Icons.remove
+                  className="w-5 text-destructive"
+                  strokeWidth={2}
+                />
+              </Button>
+            </div>
+          ))}
+        </>
+      )}
       {staticInputs.length > 0 && (
         <>
           <Label htmlFor="staticInputs">Static inputs</Label>
@@ -161,7 +161,7 @@ export default function FunctionNodeDetails({
                       ...selectedNode.data,
                       dataIns: selectedNode.data.dataIns.filter(
                         (_: DataIn, index: number) =>
-                          index !== staticInputsOffset + idx
+                          index !== staticInputsOffset + idx,
                       ),
                     })
                   }
@@ -237,7 +237,7 @@ export default function FunctionNodeDetails({
                           {input.source ??
                             selectedNode.data.name + "/" + input.name}
                         </SelectItem>
-                      )
+                      ),
                     )}
                   </SelectContent>
                 </Select>
@@ -288,7 +288,7 @@ export default function FunctionNodeDetails({
                   updateNode(selectedNode.id, {
                     ...selectedNode.data,
                     dataOuts: selectedNode.data.dataOuts.filter(
-                      (_: DataOut, index: number) => index !== idx
+                      (_: DataOut, index: number) => index !== idx,
                     ),
                   })
                 }
@@ -339,6 +339,6 @@ export default function FunctionNodeDetails({
           <Icons.add className="w-4 h-4 mr-2" /> Add from input
         </Button>
       </div>
-    </>
+    </BaseDetailsSheet>
   );
 }

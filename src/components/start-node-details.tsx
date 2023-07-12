@@ -12,6 +12,7 @@ import {
 } from "./ui/select";
 import { DataOut, dataTypes } from "@/types";
 import { NodeDetailsProps } from "./function-node-details";
+import BaseDetailsSheet from "./base-details-sheet";
 
 export default function StartNodeDetails({
   selectedNode,
@@ -20,20 +21,12 @@ export default function StartNodeDetails({
   close,
 }: NodeDetailsProps) {
   return (
-    <>
-      <div className="flex justify-between mr-16">
-        <h1 className="text-lg font-semibold text-foreground">Start</h1>
-      </div>
-      <p className="text-slate-500">
-        Here you can edit the general attributes of the workflow
-      </p>
-      <div
-        className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary"
-        onClick={close}
-      >
-        <Icons.close className="h-4 w-4" />
-        <span className="sr-only">Close</span>
-      </div>
+    <BaseDetailsSheet
+      title="Workflow start"
+      description="Here you can edit the general attributes of the workflow"
+      close={close}
+      selectedNode={selectedNode}
+    >
       <div className="grid gap-2 mt-4">
         <Label htmlFor="name">Workflow name</Label>
         <Input
@@ -137,6 +130,6 @@ export default function StartNodeDetails({
       >
         <Icons.add className="w-4 h-4 mr-2" /> Add input
       </Button>
-    </>
+    </BaseDetailsSheet>
   );
 }

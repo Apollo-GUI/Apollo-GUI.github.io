@@ -16,6 +16,7 @@ export interface EditorProps {
 const initialStartNode = {
   id: "0",
   type: "start",
+  deletable: false,
   position: { x: 0, y: 0 },
   data: getDefaultData("start"),
 } as Node;
@@ -66,13 +67,13 @@ export default function Editor({
       <aside
         className={cn(
           "w-0 ease-in-out transition-all duration-300",
-          selectedNodeIndex !== -1 && "w-[600px] min-w-[600px]",
+          selectedNode && "w-[600px] min-w-[600px]",
         )}
       >
         <div
           className={cn(
             "p-6 fixed -right-[600px] w-[600px] border-l shadow-md min-h-screen ease-in-out transition-all duration-300",
-            selectedNodeIndex !== -1 && "right-0",
+            selectedNode && "right-0",
           )}
         >
           {selectedNode && DetailsComponent && (
