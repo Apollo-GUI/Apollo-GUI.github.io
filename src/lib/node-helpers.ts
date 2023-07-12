@@ -3,6 +3,9 @@ import StartNodeDetails from "../components/start-node-details";
 import FunctionNodeDetails from "../components/function-node-details";
 import EndNodeDetails from "../components/end-node-details";
 import { ApolloNodeType } from "../types";
+import ParallelNodeDetails from "@/components/parallel-node-details";
+import IfNodeDetails from "@/components/if-node-details";
+import WhileNodeDetails from "@/components/while-node-details";
 
 export function getDefaultData(type: ApolloNodeType) {
   switch (type) {
@@ -33,6 +36,13 @@ export function getDefaultData(type: ApolloNodeType) {
         dataOuts: [],
         dataIns: [],
       };
+    case "while":
+      return {
+        name: "",
+        type: "string",
+        dataOuts: [],
+        dataIns: [],
+      };
     default:
       return {
         name: "end",
@@ -47,6 +57,12 @@ export function getDetailsComponentFromNode(node: Node) {
       return StartNodeDetails;
     case "function":
       return FunctionNodeDetails;
+    case "parallel":
+      return ParallelNodeDetails;
+    case "if":
+      return IfNodeDetails;
+    case "while":
+      return WhileNodeDetails;
     case "end":
       return EndNodeDetails;
   }

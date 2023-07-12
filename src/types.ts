@@ -101,6 +101,16 @@ export type ParallelNode = {
   iterator: Iterator;
 };
 
+
+export type WhileNode = {
+  name: string;
+  dataIns: DataIn[];
+  dataOuts: DataOut[];
+  properties?: Properties[];
+  constraints?: Constraints[];
+  condition: Condition;
+};
+
 export type IfNode = {
   name: string;
   dataIns: DataIn[];

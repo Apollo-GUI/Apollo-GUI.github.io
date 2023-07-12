@@ -1,14 +1,14 @@
 import { Handle, Position, NodeProps, NodeResizer } from "reactflow";
 import { NodeIcons } from "../icons";
 import { Separator } from "../ui/separator";
-import { ParallelNode } from "@/types";
+import { WhileNode } from "@/types";
 
-export default function ParallelNode({
+export default function WhileNode({
   data,
   selected,
-}: NodeProps<ParallelNode>) {
+}: NodeProps<WhileNode>) {
   return (
-    <div className="flex flex-col justify-between items-center h-full border-2 rounded-lg text-center bg-sky-500 -z-10 bg-opacity-20">
+    <div className="flex flex-col justify-between items-center h-full border-2 rounded-lg text-center bg-lime-500 -z-10 bg-opacity-20">
       <NodeResizer
         isVisible={selected}
         minWidth={100}
@@ -24,11 +24,11 @@ export default function ParallelNode({
 
         <div className="p-2 flex flex-col items-center">
           <div className="flex items-center text-xs text-slate-500">
-            <NodeIcons.parallel className="w-4 h-3" />
-            Parallel
+            <NodeIcons.while className="w-4 h-3" />
+            While
           </div>
           <div className="text-sm text-slate-800 font-semibold">
-            {data.name.length ? data.name : "parallel name"}
+            {data.name.length ? data.name : "while name"}
           </div>
         </div>
         {data.dataIns.length > 0 && (
