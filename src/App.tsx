@@ -1,11 +1,11 @@
-import Editor from "../components/editor";
-import NavRail from "../components/nav-rail";
+import Editor from "@/components/editor";
+import NavRail from "@/components/nav-rail";
 import "reactflow/dist/base.css";
 import { ReactFlowProvider } from "reactflow";
 import Home from "./home";
 import { useEffect, useState } from "react";
 import { Workflow } from "./types";
-import { WORKFLOW_KEY_PREFIX } from "../lib/utils";
+import { WORKFLOW_KEY_PREFIX } from "@/lib/helpers";
 
 function App() {
   const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(

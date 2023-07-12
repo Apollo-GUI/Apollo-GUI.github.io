@@ -1,11 +1,11 @@
-import { Icons } from "../components/icons";
-import { Button } from "../components/ui/button";
+import { Icons } from "@/components/icons";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "../components/ui/card";
+} from "@/components/ui/card";
 import {
   Table,
   TableHeader,
@@ -13,15 +13,15 @@ import {
   TableHead,
   TableBody,
   TableCell,
-} from "../components/ui/table";
+} from "@/components/ui/table";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "../components/ui/tooltip";
-import WorkflowActions from "../components/workflow-actions";
-import { WORKFLOW_KEY_PREFIX, getDateTimeString, uuidv4 } from "../lib/utils";
+} from "@/components/ui/tooltip";
+import WorkflowActions from "@/components/workflow-actions";
+import { WORKFLOW_KEY_PREFIX, getDateTimeString, uuidv4 } from "@/lib/helpers";
 
 import logo from "./apollo_logo.png";
 import { Workflow } from "./types";
