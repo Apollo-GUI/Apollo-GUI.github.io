@@ -31,12 +31,12 @@ export default function FunctionNode({ data }: NodeProps<FunctionNode>) {
           Function
         </div>
         <div className="text-sm text-slate-800 font-semibold">
-          {data.name.length ? data.name : "function name"}
+          {data.name?.length ? data.name : "function name"}
         </div>
       </div>
       <Separator />
       <div className="flex space-x-2 mx-2 mb-0.5">
-        {data.dataOuts.length>0 ? (
+        {data.dataOuts?.length>0 ? (
           data.dataOuts.map((dataOut, idx) => (
             <div key={idx} className="mt-2">
               <p className="text-xs text-slate-700 bg-slate-200 rounded px-2 h-[16px]">

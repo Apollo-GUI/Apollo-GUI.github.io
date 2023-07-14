@@ -214,6 +214,7 @@ export default function FlowView({
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         onInit={setReactFlowInstance}
+        deleteKeyCode={["Backspace", "Delete"]}
         onDrop={onDrop}
         onNodeDrag={onNodeDrag}
         onNodeDragStop={onNodeDragStop}

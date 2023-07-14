@@ -8,7 +8,7 @@ export default function WhileNodeDetails({
   return (
     <BaseDetailsSheet
       title="While"
-      description="Continously run a function while a condition is true."
+      description="Continously run a section while a condition is true."
       close={close}
       selectedNode={selectedNode}
     >
