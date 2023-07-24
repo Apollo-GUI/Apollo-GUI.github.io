@@ -1,3 +1,4 @@
+import { Workflow } from "@/types";
 import { Icons } from "./icons";
 import { Button } from "./ui/button";
 import {
@@ -8,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 
-export default function WorkflowActions() {
+export default function WorkflowActions({ workflow }: { workflow: Workflow }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -22,7 +23,7 @@ export default function WorkflowActions() {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-[160px]">
         <DropdownMenuItem>Edit</DropdownMenuItem>
-        <DropdownMenuItem>Make a copy</DropdownMenuItem>
+        <DropdownMenuItem onSelect={(e)=>{}}>Make a copy</DropdownMenuItem>
         <DropdownMenuItem>Export Apollo Yaml</DropdownMenuItem>
         <DropdownMenuItem>Download Graph</DropdownMenuItem>
 

@@ -8,7 +8,7 @@ export default function WhileNode({
   selected,
 }: NodeProps<WhileNode>) {
   return (
-    <div className="flex flex-col justify-between items-center h-full border-2 rounded-lg text-center bg-lime-500 -z-10 bg-opacity-20">
+    <div className="flex flex-col justify-between items-center h-full border-2 rounded-lg text-center bg-lime-500 -z-10 bg-opacity-5">
       <NodeResizer
         isVisible={selected}
         minWidth={100}

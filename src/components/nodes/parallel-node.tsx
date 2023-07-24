@@ -78,7 +78,7 @@ export default function ParallelNode({
                   <Handle
                     type="source"
                     position={Position.Bottom}
-                    id={"o" + idx}
+                    id={"o" + idx+"o"}
                     className="bg-slate-200 w-3 h-2 rounded-t-full relative"
                   />
                 </div>

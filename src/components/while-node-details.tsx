@@ -1,8 +1,10 @@
 import { NodeDetailsProps } from "./function-node-details";
 import BaseDetailsSheet from "./base-details-sheet";
+import NodeNameInput from "./node-name-input";
 
 export default function WhileNodeDetails({
   selectedNode,
+  updateNode,
   close,
 }: NodeDetailsProps) {
   return (
@@ -12,6 +14,8 @@ export default function WhileNodeDetails({
       close={close}
       selectedNode={selectedNode}
     >
+       <NodeNameInput selectedNode={selectedNode} updateNode={updateNode} />
+
     </BaseDetailsSheet>
   );
 }

@@ -101,7 +101,6 @@ export type ParallelNode = {
   iterator: Iterator;
 };
 
-
 export type WhileNode = {
   name: string;
   dataIns: DataIn[];
@@ -111,18 +110,22 @@ export type WhileNode = {
   condition: Condition;
 };
 
+export type IfData = DataIn & {
+  sendToTrue: boolean;
+  sendToFalse: boolean;
+};
+
 export type IfNode = {
   name: string;
-  dataIns: DataIn[];
-  dataOuts: DataOut[];
+  dataIns: IfData[];
   properties?: Properties[];
   constraints?: Constraints[];
   condition: Condition;
 };
 
 export type Workflow = {
-  id:string;
+  id: string;
   name: string;
   lastSaved: Date | null;
   data: any;
-}
+};
