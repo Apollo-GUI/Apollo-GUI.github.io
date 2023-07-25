@@ -1,5 +1,4 @@
 import { getDateTimeString } from "@/lib/helpers";
-import { EditorProps } from "./editor";
 import { Icons } from "./icons";
 import { Button } from "./ui/button";
 import {
@@ -11,8 +10,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import { Workflow } from "@/types";
 
-export default function SettingsMenu({ selectedWorkflow, setSelectedWorkflow }: EditorProps) {
+interface SettingsMenuProps{
+  selectedWorkflow: Workflow;
+  leavePage: ()=>void
+}
+
+export default function SettingsMenu({ selectedWorkflow, leavePage }: SettingsMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -41,7 +46,7 @@ export default function SettingsMenu({ selectedWorkflow, setSelectedWorkflow }: 
           <DropdownMenuItem>Import Graph</DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() =>setSelectedWorkflow(null)}>
+        <DropdownMenuItem onClick={leavePage}>
           Back to Dashboard
         </DropdownMenuItem>
       </DropdownMenuContent>

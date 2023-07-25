@@ -5,6 +5,7 @@ import FormatButton from "./format-button";
 import { Icons } from "./icons";
 import SaveButton from "./save-button";
 import SettingsMenu from "./settings-menu";
+import { useLeavePage } from "@/lib/helpers";
 
 export default function NavRail({
   selectedWorkflow,
@@ -17,12 +18,15 @@ export default function NavRail({
     event.dataTransfer?.setData("application/reactflow", nodeType);
     if (event.dataTransfer) event.dataTransfer.effectAllowed = "move";
   };
+
+  const confirmLeave = useLeavePage(selectedWorkflow, setSelectedWorkflow);
+
   return (
     <aside className="flex flex-col justify-between items-center w-[80px] min-w-[80px] min-h-screen text-center bg-slate-900">
       <nav className="grid gap-4  text-white">
         <Icons.logo
           className="h-12 w-12 mx-auto mt-10 mb-5 text-amber-400 cursor-pointer"
-          onClick={() => setSelectedWorkflow(null)}
+          onClick={confirmLeave}
         />
         <DraggableElement node="function" onNodeDrag={onDragStart} />
         <DraggableElement node="parallel" onNodeDrag={onDragStart} />
@@ -38,7 +42,7 @@ export default function NavRail({
         />
         <SettingsMenu
           selectedWorkflow={selectedWorkflow}
-          setSelectedWorkflow={setSelectedWorkflow}
+          leavePage={confirmLeave}
         />
       </div>
     </aside>

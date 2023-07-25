@@ -1,12 +1,13 @@
-import { Node, useEdgesState, useNodesState } from "reactflow";
+import { Node, useEdgesState, useNodesState, useReactFlow } from "reactflow";
 import FlowView from "./flow-view";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { cn } from "../lib/utils";
 import {
   getDefaultData,
   getDetailsComponentFromNode,
 } from "../lib/node-helpers";
 import { Workflow } from "@/types";
+import { useLeavePage } from "@/lib/helpers";
 
 export interface EditorProps {
   selectedWorkflow: Workflow;
@@ -26,10 +27,10 @@ export default function Editor({
   setSelectedWorkflow,
 }: EditorProps) {
   const [nodes, setNodes, onNodesChange] = useNodesState(
-    selectedWorkflow.data?.nodes ?? [initialStartNode],
+    selectedWorkflow.data?.nodes ?? [initialStartNode]
   );
   const [edges, setEdges, onEdgesChange] = useEdgesState(
-    selectedWorkflow.data?.edges ?? [],
+    selectedWorkflow.data?.edges ?? []
   );
 
   const [selectedNodeIndex, setSelectedNodeIndex] = useState<number>(-1);
@@ -41,7 +42,7 @@ export default function Editor({
           n.data = data;
         }
         return n;
-      }),
+      })
     );
   };
 
@@ -51,6 +52,35 @@ export default function Editor({
   const DetailsComponent = selectedNode
     ? getDetailsComponentFromNode(selectedNode)
     : undefined;
+
+  const { toObject } = useReactFlow();
+
+  const confirmLeaveUnload = (e: BeforeUnloadEvent) => {
+    const oldData = JSON.parse(
+      localStorage.getItem(selectedWorkflow.id) ?? ""
+    ).data;
+    const newData = toObject();
+    if (
+      !(JSON.stringify(newData.nodes) === JSON.stringify(oldData.nodes) &&
+      JSON.stringify(newData.edges) === JSON.stringify(oldData.edges))
+    ) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.returnValue = "";
+    }
+  };
+
+  const confirmLeave = useLeavePage(selectedWorkflow, setSelectedWorkflow);
+
+  useEffect(() => {
+    window.addEventListener("beforeunload", confirmLeaveUnload);
+    window.addEventListener("popstate", confirmLeave);
+
+    return () => {
+      window.removeEventListener("beforeunload", confirmLeaveUnload);
+      window.removeEventListener("popstate", confirmLeave);
+    };
+  }, [confirmLeave]);
 
   return (
     <>
@@ -67,13 +97,13 @@ export default function Editor({
       <aside
         className={cn(
           "w-0 ease-in-out transition-all duration-300",
-          selectedNode && "w-[600px] min-w-[600px]",
+          selectedNode && "w-[600px] min-w-[600px]"
         )}
       >
         <div
           className={cn(
             "p-6 fixed -right-[600px] w-[600px] border-l shadow-md min-h-screen ease-in-out transition-all duration-300",
-            selectedNode && "right-0",
+            selectedNode && "right-0"
           )}
         >
           {selectedNode && DetailsComponent && (
