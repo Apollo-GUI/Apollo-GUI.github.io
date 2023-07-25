@@ -24,12 +24,13 @@ export function useLeavePage(
   const { toObject } = useReactFlow();
   return () => {
     const oldData = JSON.parse(
-      localStorage.getItem(selectedWorkflow.id) ?? ""
+      localStorage.getItem(selectedWorkflow.id) ?? "{}"
     ).data;
     const newData = toObject();
     if (
-      JSON.stringify(newData.nodes) === JSON.stringify(oldData.nodes) &&
-      JSON.stringify(newData.edges) === JSON.stringify(oldData.edges)
+      oldData !== undefined &&
+      (JSON.stringify(newData.nodes) === JSON.stringify(oldData.nodes) &&
+        JSON.stringify(newData.edges) === JSON.stringify(oldData.edges))
     ) {
       setSelectedWorkflow(null);
       history.replaceState({}, "", "/");

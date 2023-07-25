@@ -60,10 +60,11 @@ export default function Editor({
   useEffect(() => {
     const confirmLeaveUnload = (e: BeforeUnloadEvent) => {
       const oldData = JSON.parse(
-        localStorage.getItem(selectedWorkflow.id) ?? ""
+        localStorage.getItem(selectedWorkflow.id) ?? "{}"
       ).data;
       const newData = toObject();
       if (
+        oldData === undefined ||
         !(
           JSON.stringify(newData.nodes) === JSON.stringify(oldData.nodes) &&
           JSON.stringify(newData.edges) === JSON.stringify(oldData.edges)
