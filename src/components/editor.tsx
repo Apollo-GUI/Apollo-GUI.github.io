@@ -55,24 +55,26 @@ export default function Editor({
 
   const { toObject } = useReactFlow();
 
-  const confirmLeaveUnload = (e: BeforeUnloadEvent) => {
-    const oldData = JSON.parse(
-      localStorage.getItem(selectedWorkflow.id) ?? ""
-    ).data;
-    const newData = toObject();
-    if (
-      !(JSON.stringify(newData.nodes) === JSON.stringify(oldData.nodes) &&
-      JSON.stringify(newData.edges) === JSON.stringify(oldData.edges))
-    ) {
-      e.preventDefault();
-      e.stopPropagation();
-      e.returnValue = "";
-    }
-  };
-
   const confirmLeave = useLeavePage(selectedWorkflow, setSelectedWorkflow);
 
   useEffect(() => {
+    const confirmLeaveUnload = (e: BeforeUnloadEvent) => {
+      const oldData = JSON.parse(
+        localStorage.getItem(selectedWorkflow.id) ?? ""
+      ).data;
+      const newData = toObject();
+      if (
+        !(
+          JSON.stringify(newData.nodes) === JSON.stringify(oldData.nodes) &&
+          JSON.stringify(newData.edges) === JSON.stringify(oldData.edges)
+        )
+      ) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.returnValue = "";
+      }
+    };
+
     window.addEventListener("beforeunload", confirmLeaveUnload);
     window.addEventListener("popstate", confirmLeave);
 
@@ -80,7 +82,7 @@ export default function Editor({
       window.removeEventListener("beforeunload", confirmLeaveUnload);
       window.removeEventListener("popstate", confirmLeave);
     };
-  }, [confirmLeave]);
+  }, [confirmLeave, selectedWorkflow.id, toObject]);
 
   return (
     <>

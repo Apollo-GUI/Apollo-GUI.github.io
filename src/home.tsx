@@ -1,11 +1,6 @@
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableHeader,
@@ -25,19 +20,28 @@ import { WORKFLOW_KEY_PREFIX, getDateTimeString, uuidv4 } from "@/lib/helpers";
 
 import logo from "./apollo_logo.png";
 import { Workflow } from "./types";
+import { useCallback, useEffect, useState } from "react";
 
 interface HomeProps {
   selectWorkflow: (workflow: Workflow) => void;
 }
 
 export default function Home({ selectWorkflow }: HomeProps) {
-  const workflows: Workflow[] = [];
-  const savedWorkflowCount = localStorage.length;
-  for (let index = 0; index < savedWorkflowCount; index++) {
-    const key = localStorage.key(index);
-    if (key?.startsWith(WORKFLOW_KEY_PREFIX))
-      workflows.push(JSON.parse(localStorage.getItem(key) ?? ""));
-  }
+  const [workflows, setWorkflows] = useState<Workflow[]>([])
+  const reloadWorkflows = useCallback(() => {
+    const w=[];
+    const savedWorkflowCount = localStorage.length;
+    for (let index = 0; index < savedWorkflowCount; index++) {
+      const key = localStorage.key(index);
+      if (key?.startsWith(WORKFLOW_KEY_PREFIX))
+        w.push(JSON.parse(localStorage.getItem(key) ?? ""));
+    }
+    setWorkflows(w)
+  }, []);
+
+  useEffect(() => {
+    reloadWorkflows();
+  }, [reloadWorkflows]);
 
   const addWorkflow = () =>
     selectWorkflow({
@@ -54,7 +58,11 @@ export default function Home({ selectWorkflow }: HomeProps) {
         <TooltipProvider delayDuration={300}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button size={"icon"} className="mb-4 mt-6 mx-auto" onClick={addWorkflow}>
+              <Button
+                size={"icon"}
+                className="mb-4 mt-6 mx-auto"
+                onClick={addWorkflow}
+              >
                 <Icons.add className="h-12 w-12" />
               </Button>
             </TooltipTrigger>
@@ -172,7 +180,10 @@ export default function Home({ selectWorkflow }: HomeProps) {
                               : "-"}
                           </TableCell>
                           <TableCell className="w-[200px] text-right">
-                            <WorkflowActions />
+                            <WorkflowActions
+                              workflow={workflow}
+                              reloadWorkflows={reloadWorkflows}
+                            />
                           </TableCell>
                         </TableRow>
                       ))
