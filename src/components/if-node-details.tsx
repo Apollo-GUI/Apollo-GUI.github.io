@@ -82,7 +82,7 @@ export default function IfNodeDetails({
         {selectedNode.data.dataIns?.map((input: IfData, i: number) => (
           <>
             <p className="bg-slate-200 rounded px-4 justify-self-start">
-              {input.source}
+              {input.source ?? selectedNode.data.name + "/" + input.name}
             </p>
             <Checkbox
               checked={input.sendToTrue}
@@ -92,7 +92,7 @@ export default function IfNodeDetails({
                 getEdges()
                   .filter(
                     (e) =>
-                      e.source === selectedNode.id && e.sourceHandle === "true",
+                      e.source === selectedNode.id && e.sourceHandle === "true"
                   )
                   .forEach((e) => {
                     const connectedNode = getNode(e.target)!;
@@ -106,7 +106,7 @@ export default function IfNodeDetails({
                         ...connectedNode.data,
                         dataIns: [
                           ...connectedNode.data.dataIns.filter(
-                            (d: DataIn) => d.name !== input.name,
+                            (d: DataIn) => d.name !== input.name
                           ),
                         ],
                       });
