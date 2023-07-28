@@ -47,7 +47,7 @@ export default function FlowView({
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const [reactFlowInstance, setReactFlowInstance] =
     useState<ReactFlowInstance | null>(null);
-  const { getIntersectingNodes } = useReactFlow();
+  const { getIntersectingNodes, deleteElements } = useReactFlow();
   const updateNodeInternals = useUpdateNodeInternals();
   const nodeTypes = useMemo(
     () => ({
@@ -58,28 +58,34 @@ export default function FlowView({
       while: WhileNode,
       end: EndNode,
     }),
-    [],
+    []
   );
 
   const onConnect = useCallback(
     (params: Connection) => {
       const source = nodes.find((n) => n.id === params.source);
       const target = nodes.find((n) => n.id === params.target);
-      if (source?.id === target?.id && target?.type !== "parallel") return;
+      if (
+        source?.id === target?.id &&
+        target?.type !== "parallel" &&
+        target?.type !== "while"
+      )
+        return;
 
       const inputIndex = Number(params.sourceHandle?.substring(1));
       if (source && target && !isNaN(inputIndex)) {
         const input =
-          source.type === "parallel" && !params.sourceHandle?.startsWith("o")
+          (source.type === "parallel" || source.type === "while") &&
+          !params.sourceHandle?.startsWith("o")
             ? source.data.dataIns[inputIndex]
             : source.data.dataOuts[inputIndex];
         if (
           !target.data.dataIns?.find(
-            (currentInputs: DataIn) => currentInputs.name === input.name,
+            (currentInputs: DataIn) => currentInputs.name === input.name
           )
         ) {
           if (
-            target.type === "parallel" &&
+            (target.type === "parallel" || target.type === "while") &&
             params.targetHandle === "oidefault"
           ) {
             updateNode(target.id, {
@@ -109,7 +115,7 @@ export default function FlowView({
       }
       setEdges((eds) => addEdge(params, eds));
     },
-    [nodes, setEdges, updateNode, updateNodeInternals],
+    [nodes, setEdges, updateNode, updateNodeInternals]
   );
 
   const onDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
@@ -119,31 +125,34 @@ export default function FlowView({
 
   const onNodeDrag = useCallback(
     (_: React.MouseEvent, node: Node) => {
-      const intersections = getIntersectingNodes(node).map((n) => n.id);
+      if (node.type === "start" || node.type === "end") return;
+      const intersections = getIntersectingNodes(node, false).map((n) => n.id);
 
       setNodes((ns) =>
         ns.map((n) => ({
           ...n,
           className:
-            intersections.includes(n.id) && n.type === "parallel"
+            intersections.includes(n.id) &&
+            (n.type === "parallel" || n.type === "while")
               ? "shadow-[0_0_50px_15px_rgba(0,0,0,0.3)] rounded-lg"
               : "",
-        })),
+        }))
       );
     },
-    [getIntersectingNodes, setNodes],
+    [getIntersectingNodes, setNodes]
   );
 
   const onNodeDragStop = useCallback(
     (_: React.MouseEvent, node: Node) => {
-      const intersections = getIntersectingNodes(node);
-      const intersectedParallel = intersections.find(
-        (n) => n.type === "parallel",
+      if (node.type === "start" || node.type === "end") return;
+      const intersections = getIntersectingNodes(node, false);
+      const intersectedBlock = intersections.findLast(
+        (n) => n.type === "parallel" || n.type === "while"
       );
-      if (intersectedParallel) {
+      if (intersectedBlock) {
         setNodes((ns) =>
           ns.map((n) => {
-            if (n.id === intersectedParallel.id) {
+            if (n.id === intersectedBlock.id) {
               return {
                 ...n,
                 className: "",
@@ -152,22 +161,22 @@ export default function FlowView({
             if (n.id === node.id) {
               return {
                 ...n,
-                parentNode: intersectedParallel.id,
+                parentNode: intersectedBlock.id,
                 extent: "parent",
-                ...(n.parentNode !== intersectedParallel.id && {
+                ...(n.parentNode !== intersectedBlock.id && {
                   position: {
-                    x: n.position.x - intersectedParallel.position.x,
-                    y: n.position.y - intersectedParallel.position.y,
+                    x: n.position.x - intersectedBlock.positionAbsolute.x,
+                    y: n.position.y - intersectedBlock.positionAbsolute.y,
                   },
                 }),
               };
             }
             return n;
-          }),
+          })
         );
       }
     },
-    [setNodes, getIntersectingNodes],
+    [setNodes, getIntersectingNodes]
   );
 
   const onDrop = useCallback(
@@ -191,14 +200,14 @@ export default function FlowView({
         position,
         style:
           type == "parallel" || type == "while"
-            ? { height: "200px", width: "200px" }
+            ? { height: "250px", width: "250px" }
             : undefined,
         data: getDefaultData(type as ApolloNodeType),
       } as Node;
 
       setNodes((nds) => nds.concat(newNode));
     },
-    [reactFlowInstance, setNodes],
+    [reactFlowInstance, setNodes]
   );
 
   return (
@@ -210,6 +219,11 @@ export default function FlowView({
         onNodeClick={(_, node) =>
           onNodeSelect(nodes.findIndex((n) => n.id === node.id))
         }
+        onNodesDelete={(n) => {
+          deleteElements({
+            nodes: nodes.filter((i) => i.parentNode === n[0].id),
+          });
+        }}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
