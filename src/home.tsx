@@ -102,7 +102,7 @@ export default function Home({ selectWorkflow }: HomeProps) {
               <CardTitle className="mr-4">
                 Application Orchestration and Runtime Framework
               </CardTitle>
-              <img src={logo} className="w-64" />
+              <img src={logo} className="max-w-[200px]"/>
             </CardHeader>
             <CardContent>
               <p className="my-4">

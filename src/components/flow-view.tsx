@@ -58,7 +58,7 @@ export default function FlowView({
       while: WhileNode,
       end: EndNode,
     }),
-    []
+    [],
   );
 
   const onConnect = useCallback(
@@ -81,7 +81,7 @@ export default function FlowView({
             : source.data.dataOuts[inputIndex];
         if (
           !target.data.dataIns?.find(
-            (currentInputs: DataIn) => currentInputs.name === input.name
+            (currentInputs: DataIn) => currentInputs.name === input.name,
           )
         ) {
           if (
@@ -115,7 +115,7 @@ export default function FlowView({
       }
       setEdges((eds) => addEdge(params, eds));
     },
-    [nodes, setEdges, updateNode, updateNodeInternals]
+    [nodes, setEdges, updateNode, updateNodeInternals],
   );
 
   const onDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
@@ -133,13 +133,14 @@ export default function FlowView({
           ...n,
           className:
             intersections.includes(n.id) &&
-            (n.type === "parallel" || n.type === "while")
+            (n.type === "parallel" || n.type === "while") &&
+            node.parentNode !== n.id
               ? "shadow-[0_0_50px_15px_rgba(0,0,0,0.3)] rounded-lg"
               : "",
-        }))
+        })),
       );
     },
-    [getIntersectingNodes, setNodes]
+    [getIntersectingNodes, setNodes],
   );
 
   const onNodeDragStop = useCallback(
@@ -147,17 +148,11 @@ export default function FlowView({
       if (node.type === "start" || node.type === "end") return;
       const intersections = getIntersectingNodes(node, false);
       const intersectedBlock = intersections.findLast(
-        (n) => n.type === "parallel" || n.type === "while"
+        (n) => n.type === "parallel" || n.type === "while",
       );
       if (intersectedBlock) {
         setNodes((ns) =>
           ns.map((n) => {
-            if (n.id === intersectedBlock.id) {
-              return {
-                ...n,
-                className: "",
-              };
-            }
             if (n.id === node.id) {
               return {
                 ...n,
@@ -171,12 +166,15 @@ export default function FlowView({
                 }),
               };
             }
-            return n;
-          })
+            return {
+              ...n,
+              className: "",
+            };
+          }),
         );
       }
     },
-    [setNodes, getIntersectingNodes]
+    [setNodes, getIntersectingNodes],
   );
 
   const onDrop = useCallback(
@@ -207,7 +205,7 @@ export default function FlowView({
 
       setNodes((nds) => nds.concat(newNode));
     },
-    [reactFlowInstance, setNodes]
+    [reactFlowInstance, setNodes],
   );
 
   return (
