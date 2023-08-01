@@ -81,7 +81,7 @@ export default function FlowView({
             : source.data.dataOuts[inputIndex];
         if (
           !target.data.dataIns?.find(
-            (currentInputs: DataIn) => currentInputs.name === input.name,
+            (currentInputs: DataIn) => currentInputs.id === input.id,
           )
         ) {
           if (

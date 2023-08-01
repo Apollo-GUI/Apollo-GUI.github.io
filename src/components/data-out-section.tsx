@@ -13,7 +13,7 @@ import {
 } from "./ui/select";
 import { UpdateNodeSectionProps } from "./data-in-section";
 import { useDataVariables, uuidv4 } from "@/lib/helpers";
-import { useUpdateNodeInternals } from "reactflow";
+import { useReactFlow, useUpdateNodeInternals } from "reactflow";
 
 export default function DataOutSection({
   selectedNode,
@@ -21,6 +21,7 @@ export default function DataOutSection({
 }: UpdateNodeSectionProps) {
   const { getFullDataOutName } = useDataVariables();
   const updateNodeInternals = useUpdateNodeInternals();
+  const { getNode } = useReactFlow();
   return (
     <>
       <div className="flex items-center">
@@ -41,40 +42,46 @@ export default function DataOutSection({
           {selectedNode.data.dataOuts.map((output: DataOut, idx: number) => (
             <>
               {output.source !== undefined ? (
-
-                selectedNode.type==="parallel"?<div
-                key={idx.toString()}
-                className="flex items-center justify-between col-span-2"
-              >
-                <p className="bg-slate-200 rounded px-4">{getFullDataOutName(output.source, output.id)}</p>
-                
-              </div>:
-                <Select
-                  value={output.id}
-                  key={"source" + idx}
-                  onValueChange={(e) => {
-                    selectedNode.data.dataOuts[idx] =
-                      selectedNode.data.dataIns.find((i: DataIn) => i.id === e);
-                    updateNode(selectedNode.id, {
-                      ...selectedNode.data,
-                    });
-                  }}
-                >
-                  <SelectTrigger className="col-span-2">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {selectedNode.data.dataIns.map(
-                      (input: DataIn, i: number) => (
-                        <SelectItem key={i.toString()} value={input.id}>
-                          {input.source !== selectedNode.id
-                            ? getFullDataOutName(input.source, input.id)
-                            : input.name}
-                        </SelectItem>
-                      )
-                    )}
-                  </SelectContent>
-                </Select>
+                getNode(output.source)?.parentNode === selectedNode.id ? (
+                  <div
+                    key={idx.toString()}
+                    className="flex items-center justify-between col-span-2"
+                  >
+                    <p className="bg-slate-200 rounded px-4">
+                      {getFullDataOutName(output.source, output.id)}
+                    </p>
+                  </div>
+                ) : (
+                  <Select
+                    value={output.id}
+                    key={"source" + idx}
+                    onValueChange={(e) => {
+                      selectedNode.data.dataOuts[idx] =
+                        selectedNode.data.dataIns.find(
+                          (i: DataIn) => i.id === e,
+                        );
+                      updateNode(selectedNode.id, {
+                        ...selectedNode.data,
+                      });
+                      updateNodeInternals(selectedNode.id);
+                    }}
+                  >
+                    <SelectTrigger className="col-span-2">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {selectedNode.data.dataIns.map(
+                        (input: DataIn, i: number) => (
+                          <SelectItem key={i.toString()} value={input.id}>
+                            {input.source !== selectedNode.id
+                              ? getFullDataOutName(input.source, input.id)
+                              : input.name}
+                          </SelectItem>
+                        ),
+                      )}
+                    </SelectContent>
+                  </Select>
+                )
               ) : (
                 <>
                   <Input
@@ -122,7 +129,7 @@ export default function DataOutSection({
                   updateNode(selectedNode.id, {
                     ...selectedNode.data,
                     dataOuts: selectedNode.data.dataOuts.filter(
-                      (_: DataOut, index: number) => index !== idx
+                      (_: DataOut, index: number) => index !== idx,
                     ),
                   });
                   updateNodeInternals(selectedNode.id);
@@ -143,16 +150,16 @@ export default function DataOutSection({
           variant="outline"
           size="sm"
           className="mt-2"
-          onClick={() =>{
+          onClick={() => {
             updateNode(selectedNode.id, {
               ...selectedNode.data,
               dataOuts: [
                 ...(selectedNode.data.dataOuts ?? []),
                 { id: uuidv4(), name: "", type: "" },
               ],
-            })
-            updateNodeInternals(selectedNode.id);}
-          }
+            });
+            updateNodeInternals(selectedNode.id);
+          }}
         >
           <Icons.add className="w-4 h-4 mr-2" /> Add new output
         </Button>
@@ -162,16 +169,16 @@ export default function DataOutSection({
           variant="outline"
           size="sm"
           className="mt-2"
-          onClick={() =>{
+          onClick={() => {
             updateNode(selectedNode.id, {
               ...selectedNode.data,
               dataOuts: [
                 ...(selectedNode.data.dataOuts ?? []),
                 { id: uuidv4(), source: "" },
               ],
-            })
-            updateNodeInternals(selectedNode.id);}
-          }
+            });
+            updateNodeInternals(selectedNode.id);
+          }}
         >
           <Icons.add className="w-4 h-4 mr-2" /> Add from input
         </Button>
