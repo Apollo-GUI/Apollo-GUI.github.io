@@ -2,8 +2,10 @@ import { Handle, NodeProps, Position } from "reactflow";
 import { EndNode } from "@/types";
 import { NodeIcons } from "../icons";
 import { Separator } from "../ui/separator";
+import { useDataVariables } from "@/lib/helpers";
 
 export default function EndNode({ data }: NodeProps<EndNode>) {
+  const { getDataInName } = useDataVariables();
   return (
     <div className="flex flex-col items-center shadow-md rounded-md bg-white border-2">
       <Handle
@@ -19,7 +21,7 @@ export default function EndNode({ data }: NodeProps<EndNode>) {
             key={idx}
             className="text-xs text-slate-700 bg-slate-200 rounded px-2 h-[16px] mb-1"
           >
-            {input.name}
+            {getDataInName("",input)}
           </p>
         ))}
       </div>

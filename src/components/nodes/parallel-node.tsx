@@ -1,12 +1,15 @@
-import { Handle, Position, NodeProps, NodeResizer } from "reactflow";
+import { Handle, Position, NodeProps, NodeResizer, useNodeId } from "reactflow";
 import { NodeIcons } from "../icons";
 import { Separator } from "../ui/separator";
 import { ParallelNode } from "@/types";
+import { useDataVariables } from "@/lib/helpers";
 
 export default function ParallelNode({
   data,
   selected,
 }: NodeProps<ParallelNode>) {
+  const { getDataInName,getDataOutName } = useDataVariables();
+  const nodeId = useNodeId()??"";
   return (
     <div className="flex flex-col justify-between items-center h-full border-2 rounded-lg text-center bg-sky-500 -z-10 bg-opacity-20">
       <NodeResizer
@@ -38,7 +41,7 @@ export default function ParallelNode({
               {data.dataIns.map((dataIn, idx) => (
                 <div key={idx} className="mt-2">
                   <p className="text-xs text-slate-700 bg-slate-200 rounded px-2 h-[16px]">
-                    {dataIn.name}
+                    {getDataInName(nodeId,dataIn)}
                   </p>
                   <Handle
                     type="source"
@@ -73,12 +76,12 @@ export default function ParallelNode({
               {data.dataOuts.map((dataOut, idx) => (
                 <div key={idx}>
                   <p className="text-xs text-slate-700 bg-slate-200 rounded px-2 h-[16px]">
-                    {dataOut.name}
+                    {getDataOutName(dataOut)}
                   </p>
                   <Handle
                     type="source"
                     position={Position.Bottom}
-                    id={"o" + idx+"o"}
+                    id={"o" + idx}
                     className="bg-slate-200 w-3 h-2 rounded-t-full relative"
                   />
                 </div>

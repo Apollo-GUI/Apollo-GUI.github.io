@@ -13,12 +13,14 @@ import {
 } from "./ui/select";
 import { UpdateNodeSectionProps } from "./data-in-section";
 import { useDataVariables, uuidv4 } from "@/lib/helpers";
+import { useUpdateNodeInternals } from "reactflow";
 
 export default function DataOutSection({
   selectedNode,
   updateNode,
 }: UpdateNodeSectionProps) {
   const { getFullDataOutName } = useDataVariables();
+  const updateNodeInternals = useUpdateNodeInternals();
   return (
     <>
       <div className="flex items-center">
@@ -39,11 +41,20 @@ export default function DataOutSection({
           {selectedNode.data.dataOuts.map((output: DataOut, idx: number) => (
             <>
               {output.source !== undefined ? (
+
+                selectedNode.type==="parallel"?<div
+                key={idx.toString()}
+                className="flex items-center justify-between col-span-2"
+              >
+                <p className="bg-slate-200 rounded px-4">{getFullDataOutName(output.source, output.id)}</p>
+                
+              </div>:
                 <Select
                   value={output.id}
                   key={"source" + idx}
                   onValueChange={(e) => {
-                    selectedNode.data.dataOuts[idx] = selectedNode.data.dataIns.find((i:DataIn)=>i.id===e);
+                    selectedNode.data.dataOuts[idx] =
+                      selectedNode.data.dataIns.find((i: DataIn) => i.id === e);
                     updateNode(selectedNode.id, {
                       ...selectedNode.data,
                     });
@@ -55,11 +66,10 @@ export default function DataOutSection({
                   <SelectContent>
                     {selectedNode.data.dataIns.map(
                       (input: DataIn, i: number) => (
-                        <SelectItem
-                          key={i.toString()}
-                          value={input.id}
-                        >
-                          {input.source!==selectedNode.id?getFullDataOutName(input.source, input.id):input.name}
+                        <SelectItem key={i.toString()} value={input.id}>
+                          {input.source !== selectedNode.id
+                            ? getFullDataOutName(input.source, input.id)
+                            : input.name}
                         </SelectItem>
                       )
                     )}
@@ -108,14 +118,15 @@ export default function DataOutSection({
                 variant="ghost"
                 size="icon"
                 key={"del" + idx}
-                onClick={() =>
+                onClick={() => {
                   updateNode(selectedNode.id, {
                     ...selectedNode.data,
                     dataOuts: selectedNode.data.dataOuts.filter(
                       (_: DataOut, index: number) => index !== idx
                     ),
-                  })
-                }
+                  });
+                  updateNodeInternals(selectedNode.id);
+                }}
               >
                 <Icons.remove
                   className="w-5 text-destructive"
@@ -132,14 +143,15 @@ export default function DataOutSection({
           variant="outline"
           size="sm"
           className="mt-2"
-          onClick={() =>
+          onClick={() =>{
             updateNode(selectedNode.id, {
               ...selectedNode.data,
               dataOuts: [
                 ...(selectedNode.data.dataOuts ?? []),
-                { id:uuidv4(), name: "", type: "" },
+                { id: uuidv4(), name: "", type: "" },
               ],
             })
+            updateNodeInternals(selectedNode.id);}
           }
         >
           <Icons.add className="w-4 h-4 mr-2" /> Add new output
@@ -150,14 +162,15 @@ export default function DataOutSection({
           variant="outline"
           size="sm"
           className="mt-2"
-          onClick={() =>
+          onClick={() =>{
             updateNode(selectedNode.id, {
               ...selectedNode.data,
               dataOuts: [
                 ...(selectedNode.data.dataOuts ?? []),
-                { id:uuidv4(), source: "" },
+                { id: uuidv4(), source: "" },
               ],
             })
+            updateNodeInternals(selectedNode.id);}
           }
         >
           <Icons.add className="w-4 h-4 mr-2" /> Add from input

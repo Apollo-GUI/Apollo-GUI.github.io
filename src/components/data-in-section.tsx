@@ -1,5 +1,5 @@
 import { DataIn, dataTypes } from "@/types";
-import { Node } from "reactflow";
+import { Node, useUpdateNodeInternals } from "reactflow";
 import InfoButton from "./info-button";
 import { Button } from "./ui/button";
 import { Icons } from "./icons";
@@ -25,6 +25,7 @@ export default function DataInSection({
 }: UpdateNodeSectionProps) {
 
   const { getFullDataOutName } = useDataVariables();
+  const updateNodeInternals = useUpdateNodeInternals();
 
   const staticInputs = selectedNode.data.dataIns?.filter(
     (i: DataIn) => i.source === selectedNode.id
@@ -62,6 +63,15 @@ export default function DataInSection({
                 <Icons.remove
                   className="w-5 text-destructive"
                   strokeWidth={2}
+                  onClick={() => {
+                    updateNode(selectedNode.id, {
+                      ...selectedNode.data,
+                      dataIns: selectedNode.data.dataIns.filter(
+                        (_: DataIn, index: number) => index !== idx
+                      ),
+                    });
+                    updateNodeInternals(selectedNode.id);
+                  }}
                 />
               </Button>
             </div>
@@ -130,7 +140,7 @@ export default function DataInSection({
                   variant="ghost"
                   size="icon"
                   key={"del" + idx}
-                  onClick={() =>
+                  onClick={() =>{
                     updateNode(selectedNode.id, {
                       ...selectedNode.data,
                       dataIns: selectedNode.data.dataIns.filter(
@@ -138,6 +148,7 @@ export default function DataInSection({
                           index !== staticInputsOffset + idx
                       ),
                     })
+                    updateNodeInternals(selectedNode.id);}
                   }
                 >
                   <Icons.remove
@@ -154,7 +165,7 @@ export default function DataInSection({
         variant="outline"
         size="sm"
         className="mt-2"
-        onClick={() =>
+        onClick={() =>{
           updateNode(selectedNode.id, {
             ...selectedNode.data,
             dataIns: [
@@ -162,6 +173,7 @@ export default function DataInSection({
               { id:uuidv4(), name: "", type: "", source:selectedNode.id },
             ],
           })
+          updateNodeInternals(selectedNode.id);}
         }
       >
         <Icons.add className="w-4 h-4 mr-2" /> Add static inputs

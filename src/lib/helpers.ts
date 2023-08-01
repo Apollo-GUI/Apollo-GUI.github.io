@@ -61,15 +61,20 @@ export function useDataVariables() {
     getDataOutName: (output: DataOut) => {
       return output.source === undefined
         ? output.name
-        : getNode(output.source)?.data.dataOuts.find((e: DataIn) => e.id === output.id)
-            ?.name;
+        : getNode(output.source)?.data.dataOuts.find(
+            (e: DataIn) => e.id === output.id
+          )?.name;
     },
     getFullDataOutName: (nodeId: string, dataId: string) => {
-      const nodeData = getNode(nodeId)?.data;
+      const node = getNode(nodeId);
+      let parent = node?.parentNode ? node : undefined;
+      while (parent?.parentNode !== undefined) {
+        parent = getNode(parent?.parentNode);
+      }
       return (
-        nodeData.name +
+        (parent?.data.name ?? node?.data.name) +
         "/" +
-        nodeData?.dataOuts.find((e: DataOut) => e.id === dataId)?.name
+        node?.data.dataOuts.find((e: DataOut) => e.id === dataId)?.name
       );
     },
   };
