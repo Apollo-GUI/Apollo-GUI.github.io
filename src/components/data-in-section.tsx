@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
+import { useDataVariables, uuidv4 } from "@/lib/helpers";
 
 export interface UpdateNodeSectionProps {
   selectedNode: Node;
@@ -22,11 +23,14 @@ export default function DataInSection({
   selectedNode,
   updateNode,
 }: UpdateNodeSectionProps) {
+
+  const { getFullDataOutName } = useDataVariables();
+
   const staticInputs = selectedNode.data.dataIns?.filter(
-    (i: DataIn) => i.source === undefined
+    (i: DataIn) => i.source === selectedNode.id
   );
   const parentInputs = selectedNode.data.dataIns?.filter(
-    (i: DataIn) => i.source !== undefined
+    (i: DataIn) => i.source !== selectedNode.id
   );
 
   const staticInputsOffset =
@@ -53,7 +57,7 @@ export default function DataInSection({
               key={idx.toString()}
               className="flex items-center justify-between"
             >
-              <p className="bg-slate-200 rounded px-4">{input.source}</p>
+              <p className="bg-slate-200 rounded px-4">{getFullDataOutName(input.source, input.id)}</p>
               <Button type="button" variant="ghost" size="icon">
                 <Icons.remove
                   className="w-5 text-destructive"
@@ -155,7 +159,7 @@ export default function DataInSection({
             ...selectedNode.data,
             dataIns: [
               ...(selectedNode.data.dataIns ?? []),
-              { name: "", type: "" },
+              { id:uuidv4(), name: "", type: "", source:selectedNode.id },
             ],
           })
         }

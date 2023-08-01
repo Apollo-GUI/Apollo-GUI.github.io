@@ -93,8 +93,8 @@ export default function FlowView({
               dataOuts: [
                 ...(target.data.dataOuts ?? []),
                 {
-                  name: input.name,
-                  source: source.data.name + "/" + input.name,
+                  id: input.id,
+                  source: source.id,
                 },
               ],
             });
@@ -104,8 +104,8 @@ export default function FlowView({
               dataIns: [
                 ...(target.data.dataIns ?? []),
                 {
-                  name: input.name,
-                  source: source.data.name + "/" + input.name,
+                  id: input.id,
+                  source: source.id,
                 },
               ],
             });

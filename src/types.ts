@@ -17,18 +17,20 @@ export const dataTypes = [
 export type DataType = (typeof dataTypes)[number];
 
 export type DataIn = {
-  name: string;
-  type: DataType;
-  source?: string;
+  id: string;
+  name?: string;
+  type?: DataType;
+  source: string;
   value?: string;
   properties?: Properties[];
   constraints?: Constraints[];
 };
 
 export type DataOut = {
-  name: string;
-  type: DataType;
-  source: string;
+  id: string;
+  name?: string;
+  type?: DataType;
+  source?: string;
   properties?: Properties[];
   constraints?: Constraints[];
 };

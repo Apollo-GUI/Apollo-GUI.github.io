@@ -1,9 +1,13 @@
-import { Handle, Position, NodeProps } from "reactflow";
+import { Handle, Position, NodeProps, useNodeId } from "reactflow";
 import { NodeIcons } from "../icons";
 import { Separator } from "../ui/separator";
 import { FunctionNode } from "@/types";
+import { useDataVariables } from "@/lib/helpers";
 
 export default function FunctionNode({ data }: NodeProps<FunctionNode>) {
+  const { getDataInName,getDataOutName } = useDataVariables();
+  const nodeId = useNodeId()??"";
+
   return (
     <div className="flex flex-col items-center shadow-md rounded-md bg-white border-2">
       <Handle
@@ -19,7 +23,7 @@ export default function FunctionNode({ data }: NodeProps<FunctionNode>) {
             key={idx}
             className="text-xs text-slate-700 bg-slate-200 rounded px-2 h-[16px] mb-1"
           >
-            {input.name}
+            {getDataInName(nodeId,input)}
           </p>
         ))}
       </div>
@@ -40,7 +44,7 @@ export default function FunctionNode({ data }: NodeProps<FunctionNode>) {
           data.dataOuts.map((dataOut, idx) => (
             <div key={idx} className="mt-2">
               <p className="text-xs text-slate-700 bg-slate-200 rounded px-2 h-[16px]">
-                {dataOut.name}
+                {getDataOutName(dataOut)}
               </p>
               <Handle
                 type="source"

@@ -12,11 +12,13 @@ import {
   SelectValue,
 } from "./ui/select";
 import { UpdateNodeSectionProps } from "./data-in-section";
+import { useDataVariables, uuidv4 } from "@/lib/helpers";
 
 export default function DataOutSection({
   selectedNode,
   updateNode,
 }: UpdateNodeSectionProps) {
+  const { getFullDataOutName } = useDataVariables();
   return (
     <>
       <div className="flex items-center">
@@ -31,20 +33,17 @@ export default function DataOutSection({
       </div>
       {selectedNode.data.dataOuts?.length > 0 && (
         <div className="grid grid-cols-[3fr_1fr_30px] gap-2 mt-4">
-          <Label htmlFor="staticInputs">Name</Label>
-          <Label htmlFor="staticInputs">Type</Label>
+          <Label>Name</Label>
+          <Label>Type</Label>
           <div />
           {selectedNode.data.dataOuts.map((output: DataOut, idx: number) => (
             <>
               {output.source !== undefined ? (
                 <Select
-                  value={output.source}
+                  value={output.id}
                   key={"source" + idx}
                   onValueChange={(e) => {
-                    selectedNode.data.dataOuts[idx].source = e;
-                    const names = e.split("/");
-                    selectedNode.data.dataOuts[idx].name =
-                      names[names.length - 1];
+                    selectedNode.data.dataOuts[idx] = selectedNode.data.dataIns.find((i:DataIn)=>i.id===e);
                     updateNode(selectedNode.id, {
                       ...selectedNode.data,
                     });
@@ -58,13 +57,9 @@ export default function DataOutSection({
                       (input: DataIn, i: number) => (
                         <SelectItem
                           key={i.toString()}
-                          value={
-                            input.source ??
-                            selectedNode.data.name + "/" + input.name
-                          }
+                          value={input.id}
                         >
-                          {input.source ??
-                            selectedNode.data.name + "/" + input.name}
+                          {input.source!==selectedNode.id?getFullDataOutName(input.source, input.id):input.name}
                         </SelectItem>
                       )
                     )}
@@ -142,7 +137,7 @@ export default function DataOutSection({
               ...selectedNode.data,
               dataOuts: [
                 ...(selectedNode.data.dataOuts ?? []),
-                { name: "", type: "" },
+                { id:uuidv4(), name: "", type: "" },
               ],
             })
           }
@@ -160,7 +155,7 @@ export default function DataOutSection({
               ...selectedNode.data,
               dataOuts: [
                 ...(selectedNode.data.dataOuts ?? []),
-                { name: "", type: "", source: "" },
+                { id:uuidv4(), source: "" },
               ],
             })
           }

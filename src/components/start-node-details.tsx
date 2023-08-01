@@ -13,6 +13,7 @@ import {
 import { DataOut, dataTypes } from "@/types";
 import { NodeDetailsProps } from "./function-node-details";
 import BaseDetailsSheet from "./base-details-sheet";
+import { uuidv4 } from "@/lib/helpers";
 
 export default function StartNodeDetails({
   selectedNode,
@@ -123,7 +124,7 @@ export default function StartNodeDetails({
             ...selectedNode.data,
             dataOuts: [
               ...(selectedNode.data.dataOuts ?? []),
-              { name: "", type: "" },
+              { id:uuidv4(), name: "", type: "" },
             ],
           })
         }

@@ -1,4 +1,4 @@
-import { Workflow } from "@/types";
+import { DataIn, DataOut, Workflow } from "@/types";
 import { useReactFlow } from "reactflow";
 
 export const WORKFLOW_KEY_PREFIX = "wf_";
@@ -29,8 +29,8 @@ export function useLeavePage(
     const newData = toObject();
     if (
       oldData !== undefined &&
-      (JSON.stringify(newData.nodes) === JSON.stringify(oldData.nodes) &&
-        JSON.stringify(newData.edges) === JSON.stringify(oldData.edges))
+      JSON.stringify(newData.nodes) === JSON.stringify(oldData.nodes) &&
+      JSON.stringify(newData.edges) === JSON.stringify(oldData.edges)
     ) {
       setSelectedWorkflow(null);
       history.replaceState({}, "", "/");
@@ -44,5 +44,33 @@ export function useLeavePage(
     } else {
       history.replaceState({}, "", "/" + selectedWorkflow.id);
     }
+  };
+}
+
+export function useDataVariables() {
+  const { getNode } = useReactFlow();
+
+  return {
+    getDataInName: (nodeId: string, input: DataIn) => {
+      return input.source === nodeId
+        ? input.name
+        : getNode(input.source)?.data.dataOuts.find(
+            (e: DataOut) => e.id === input.id
+          )?.name;
+    },
+    getDataOutName: (output: DataOut) => {
+      return output.source === undefined
+        ? output.name
+        : getNode(output.source)?.data.dataOuts.find((e: DataIn) => e.id === output.id)
+            ?.name;
+    },
+    getFullDataOutName: (nodeId: string, dataId: string) => {
+      const nodeData = getNode(nodeId)?.data;
+      return (
+        nodeData.name +
+        "/" +
+        nodeData?.dataOuts.find((e: DataOut) => e.id === dataId)?.name
+      );
+    },
   };
 }
