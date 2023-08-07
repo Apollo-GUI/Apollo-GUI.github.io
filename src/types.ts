@@ -16,6 +16,19 @@ export const dataTypes = [
 ] as const;
 export type DataType = (typeof dataTypes)[number];
 
+export const conditionTypes = [
+  "==",
+  "!=",
+  "<",
+  "<=",
+  ">",
+  ">=",
+  "contains",
+  "startsWith",
+  "endsWith",
+] as const;
+export type ContditionType = (typeof conditionTypes)[number];
+
 export type DataIn = {
   id: string;
   name?: string;
@@ -122,7 +135,7 @@ export type IfNode = {
   dataIns: IfData[];
   properties?: Properties[];
   constraints?: Constraints[];
-  condition: Condition;
+  conditions: Condition[];
 };
 
 export type Workflow = {

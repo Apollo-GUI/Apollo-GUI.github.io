@@ -35,6 +35,7 @@ export function getDefaultData(type: ApolloNodeType) {
         type: "string",
         dataOuts: [],
         dataIns: [],
+        conditions:[{}],
       };
     case "while":
       return {
