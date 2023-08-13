@@ -1,6 +1,6 @@
 import { Node, useEdgesState, useNodesState, useReactFlow } from "reactflow";
 import FlowView from "./flow-view";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "../lib/utils";
 import {
   getDefaultData,

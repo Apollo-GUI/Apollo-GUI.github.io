@@ -1,7 +1,7 @@
 import { Icons } from "./icons";
 import { Button } from "./ui/button";
 
-import { DataIn, DataOut } from "@/types";
+import { DataIn } from "@/types";
 import { NodeDetailsProps } from "./function-node-details";
 import BaseDetailsSheet from "./base-details-sheet";
 import { useDataVariables } from "@/lib/helpers";

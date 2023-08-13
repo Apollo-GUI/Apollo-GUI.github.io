@@ -148,7 +148,7 @@ export default function FlowView({
       if (node.type === "start" || node.type === "end") return;
       const intersections = getIntersectingNodes(node, false);
       const intersectedBlock = intersections.findLast(
-        (n) => n.type === "parallel" || n.type === "while",
+        (n:any) => n.type === "parallel" || n.type === "while",
       );
       if (intersectedBlock) {
         setNodes((ns) =>
@@ -160,8 +160,8 @@ export default function FlowView({
                 extent: "parent",
                 ...(n.parentNode !== intersectedBlock.id && {
                   position: {
-                    x: n.position.x - intersectedBlock.positionAbsolute.x,
-                    y: n.position.y - intersectedBlock.positionAbsolute.y,
+                    x: n.position.x - intersectedBlock.positionAbsolute!.x,
+                    y: n.position.y - intersectedBlock.positionAbsolute!.y,
                   },
                 }),
               };

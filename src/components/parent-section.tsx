@@ -7,7 +7,6 @@ import { Separator } from "./ui/separator";
 
 export default function ParentSection({
   selectedNode,
-  updateNode,
 }: UpdateNodeSectionProps) {
   const updateNodeInternals = useUpdateNodeInternals();
   return selectedNode.parentNode ? (

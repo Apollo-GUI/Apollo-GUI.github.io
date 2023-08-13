@@ -1,5 +1,4 @@
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { Button } from "./ui/button";
 import { Icons } from "./icons";
 
 export default function InfoButton({ infoText }: { infoText: string }) {

@@ -1,12 +1,8 @@
 import React from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
-import { Button } from "./ui/button";
-import { Icons } from "./icons";
 import {
   Command,
-  CommandEmpty,
   CommandGroup,
-  CommandInput,
   CommandItem,
 } from "./ui/command";
 import { Check } from "lucide-react";
