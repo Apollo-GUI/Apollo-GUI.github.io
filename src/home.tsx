@@ -21,6 +21,7 @@ import { WORKFLOW_KEY_PREFIX, getDateTimeString, uuidv4 } from "@/lib/helpers";
 import logo from "./apollo_logo.png";
 import { Workflow } from "./types";
 import { useCallback, useEffect, useState } from "react";
+import { Alert, AlertDescription, AlertTitle } from "./components/ui/alert";
 
 interface HomeProps {
   selectWorkflow: (workflow: Workflow) => void;
@@ -74,7 +75,7 @@ export default function Home({ selectWorkflow }: HomeProps) {
         <TooltipProvider delayDuration={300}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button size={"icon"} className="mx-auto" onClick={addWorkflow}>
+              <Button size={"icon"} className="mx-auto" disabled>
                 <Icons.import className="h-12 w-12" />
               </Button>
             </TooltipTrigger>
@@ -96,6 +97,13 @@ export default function Home({ selectWorkflow }: HomeProps) {
             </p>
           </div>
         </div>
+<Alert variant="destructive">
+  <Icons.terminal className="h-4 w-4" />
+  <AlertTitle>Heads up!</AlertTitle>
+  <AlertDescription>
+    This project is still in active development and may still have issus. If you find anything please open an issue in the <a href="https://github.com/Apollo-GUI/apollo-editor" target="_blank" className="font-bold">Github repository</a>.
+  </AlertDescription>
+</Alert>
         <div className="grid gap-4 grid-cols-3 items-start">
           <Card>
             <CardHeader className="flex flex-row justify-between items-center">
@@ -147,7 +155,7 @@ export default function Home({ selectWorkflow }: HomeProps) {
                   <Icons.add className="mr-2 h-4 w-4" />
                   New workflow
                 </Button>
-                <Button variant="outline" onClick={addWorkflow}>
+                <Button variant="outline" disabled>
                   <Icons.import className="mr-2 h-4 w-4" />
                   Import workflow
                 </Button>
