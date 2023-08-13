@@ -101,7 +101,7 @@ export default function Home({ selectWorkflow }: HomeProps) {
   <Icons.terminal className="h-4 w-4" />
   <AlertTitle>Heads up!</AlertTitle>
   <AlertDescription>
-    This project is still in active development and may still have issus. If you find anything please open an issue in the <a href="https://github.com/Apollo-GUI/apollo-editor" target="_blank" className="font-bold">Github repository</a>.
+    This project is still in active development and may still have issus. If you find anything please open an issue in the <a href="https://github.com/Apollo-GUI/Apollo-GUI.github.io" target="_blank" className="font-bold">Github repository</a>.
   </AlertDescription>
 </Alert>
         <div className="grid gap-4 grid-cols-3 items-start">
