@@ -11,13 +11,17 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Workflow } from "@/types";
+import { exportApolloYaml } from "@/lib/exporter";
 
-interface SettingsMenuProps{
+interface SettingsMenuProps {
   selectedWorkflow: Workflow;
-  leavePage: ()=>void
+  leavePage: () => void;
 }
 
-export default function SettingsMenu({ selectedWorkflow, leavePage }: SettingsMenuProps) {
+export default function SettingsMenu({
+  selectedWorkflow,
+  leavePage,
+}: SettingsMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -41,7 +45,9 @@ export default function SettingsMenu({ selectedWorkflow, leavePage }: SettingsMe
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>Export Apollo Yaml</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => exportApolloYaml(selectedWorkflow)}>
+            Export Apollo Yaml
+          </DropdownMenuItem>
           <DropdownMenuItem>Download Graph</DropdownMenuItem>
           <DropdownMenuItem>Import Graph</DropdownMenuItem>
         </DropdownMenuGroup>

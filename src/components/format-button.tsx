@@ -12,7 +12,7 @@ export default function FormatButton() {
     <TooltipProvider delayDuration={300}>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button size={"icon"} className="mb-4">
+          <Button size={"icon"} className="mb-4" disabled>
             <Icons.format className="h-8 w-8" />
           </Button>
         </TooltipTrigger>
