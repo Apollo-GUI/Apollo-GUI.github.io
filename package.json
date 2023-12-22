@@ -31,7 +31,7 @@
     "reactflow": "^11.7.4",
     "tailwind-merge": "^1.13.2",
     "tailwindcss-animate": "^1.0.6",
-    "yaml": "^2.3.4"
+    "vite-plugin-wasm": "^3.3.0"
   },
   "devDependencies": {
     "@types/node": "^20.4.1",

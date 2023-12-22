@@ -1,0 +1,25 @@
+[package]
+name = "wf-exporter"
+version = "0.1.0"
+authors = ["Fl0h0 <neururer.florian@gmail.com>"]
+description = "Exporter for Apollo yaml from internal representation"
+repository = "https://github.com/Apollo-GUI/Apollo-GUI.github.io"
+license = "Apache-2.0"
+edition = "2018"
+
+[lib]
+crate-type = ["cdylib"]
+
+[features]
+default = ["console_error_panic_hook"]
+
+[dependencies]
+wasm-bindgen = "0.2.84"
+serde = { version = "1.0", features = ["derive"] }
+gloo-utils = { version = "0.1", features = ["serde"] }
+serde_yaml = "0.9"
+console_error_panic_hook = { version = "0.1.7", optional = true }
+serde_with = "3.4.0"
+
+[profile.release]
+opt-level = "s"

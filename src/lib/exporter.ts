@@ -1,10 +1,11 @@
 import { Workflow } from "@/types";
-import YAML from 'yaml'
+
+import { convert_to_wf_yaml } from "../../wf-exporter/pkg";
 
 export function exportApolloYaml(workflow: Workflow) {
+  const result = convert_to_wf_yaml(workflow);
 
-  const graphObject={name:workflow.name, workflowBody: createWorkflowBody(workflow.data)}
-  const file = new File(["\ufeff" + YAML.stringify(graphObject)], `${workflow.name}.yaml`, {
+  const file = new File(["\ufeff" + result], `${workflow.name}.yaml`, {
     type: "text/plain:charset=UTF-8",
   });
 
@@ -17,18 +18,3 @@ export function exportApolloYaml(workflow: Workflow) {
   window.URL.revokeObjectURL(url);
 }
 
-function createWorkflowBody(workflowData: any){
-
-  const workflowBody={} as any
-
-  // const [edges] = useEdgesState(
-  //   workflowData.edges 
-  // );
-  //
-
-  const startNode = workflowData.nodes.find((n:any)=>n.type=='start')
-
-  workflowBody['dataIns']=startNode?.data.dataOuts;
-
-  return workflowBody
-}
