@@ -99,6 +99,7 @@ export type FunctionNode = {
 
 export type StartNode = {
   name: string;
+  type: string;
   dataOuts: DataOut[];
 };
 

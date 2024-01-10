@@ -1,9 +1,10 @@
-import { Workflow } from "@/types";
-
 import { convert_to_wf_yaml } from "../../wf-exporter/pkg";
 
-export function exportApolloYaml(workflow: Workflow) {
+export function exportApolloYaml(workflow: { name: string; data: any }) {
+  console.log(workflow);
   const result = convert_to_wf_yaml(workflow);
+
+  if (result.length == 0) return;
 
   const file = new File(["\ufeff" + result], `${workflow.name}.yaml`, {
     type: "text/plain:charset=UTF-8",
@@ -17,4 +18,3 @@ export function exportApolloYaml(workflow: Workflow) {
   a.click();
   window.URL.revokeObjectURL(url);
 }
-

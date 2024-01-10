@@ -12,6 +12,7 @@ import {
 } from "./ui/dropdown-menu";
 import { Workflow } from "@/types";
 import { exportApolloYaml } from "@/lib/exporter";
+import { useReactFlow } from "reactflow";
 
 interface SettingsMenuProps {
   selectedWorkflow: Workflow;
@@ -22,6 +23,8 @@ export default function SettingsMenu({
   selectedWorkflow,
   leavePage,
 }: SettingsMenuProps) {
+  const { toObject } = useReactFlow();
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -45,7 +48,14 @@ export default function SettingsMenu({
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => exportApolloYaml(selectedWorkflow)}>
+          <DropdownMenuItem
+            onClick={() =>
+              exportApolloYaml({
+                name: selectedWorkflow.name,
+                data: toObject(),
+              })
+            }
+          >
             Export Apollo Yaml
           </DropdownMenuItem>
           <DropdownMenuItem>Download Graph</DropdownMenuItem>

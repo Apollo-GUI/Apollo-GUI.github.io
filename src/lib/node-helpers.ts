@@ -12,6 +12,7 @@ export function getDefaultData(type: ApolloNodeType) {
     case "start":
       return {
         name: "",
+        type: "string",
         dataOuts: [],
       };
     case "function":
@@ -35,7 +36,7 @@ export function getDefaultData(type: ApolloNodeType) {
         type: "string",
         dataOuts: [],
         dataIns: [],
-        conditions:[{}],
+        conditions: [{}],
       };
     case "while":
       return {

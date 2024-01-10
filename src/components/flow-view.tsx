@@ -94,7 +94,7 @@ export default function FlowView({
                 ...(target.data.dataOuts ?? []),
                 {
                   id: input.id,
-                  source: input.source??source.id,
+                  source: input.source ?? source.id,
                 },
               ],
             });
@@ -105,7 +105,7 @@ export default function FlowView({
                 ...(target.data.dataIns ?? []),
                 {
                   id: input.id,
-                  source: input.source??source.id,
+                  source: input.source ?? source.id,
                 },
               ],
             });
@@ -148,7 +148,7 @@ export default function FlowView({
       if (node.type === "start" || node.type === "end") return;
       const intersections = getIntersectingNodes(node, false);
       const intersectedBlock = intersections.findLast(
-        (n:any) => n.type === "parallel" || n.type === "while",
+        (n: any) => n.type === "parallel" || n.type === "while",
       );
       if (intersectedBlock) {
         setNodes((ns) =>
@@ -193,7 +193,7 @@ export default function FlowView({
         y: event.clientY - (reactFlowBounds?.top ?? 0),
       });
       const newNode = {
-        id: uuidv4(),
+        id: type == "end" ? "end" : uuidv4(),
         type: type,
         position,
         style:
