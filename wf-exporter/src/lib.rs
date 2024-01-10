@@ -22,12 +22,12 @@ pub struct Workflow {
 
 #[derive(Deserialize)]
 struct Data {
-    nodes: Vec<Node>,
+    nodes: Vec<EditorNode>,
     edges: Vec<Edge>,
 }
 
 #[derive(Deserialize)]
-struct Node {
+struct EditorNode {
     id: String,
     #[serde(rename = "type")]
     typ: String,
