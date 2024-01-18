@@ -35,6 +35,7 @@ export type DataIn = {
   type?: DataType;
   source: string;
   value?: string;
+  rename?: string;
   properties?: Properties[];
   constraints?: Constraints[];
 };
@@ -44,13 +45,14 @@ export type DataOut = {
   name?: string;
   type?: DataType;
   source?: string;
+  startSource?: string;
   properties?: Properties[];
   constraints?: Constraints[];
 };
 
 export type Condition = {
-  data1: DataIn;
-  data2: DataIn;
+  data1: string;
+  data2: string;
   type: string;
   operator: string;
   negation: string;
@@ -126,14 +128,24 @@ export type WhileNode = {
   condition: Condition;
 };
 
-export type IfData = DataIn & {
+export type IfDataIn = DataIn & {
   sendToTrue: boolean;
   sendToFalse: boolean;
 };
 
+export type IfDataOut = {
+  id: string;
+  name?: string;
+  sources?: string[];
+  properties?: Properties[];
+  constraints?: Constraints[];
+};
+
 export type IfNode = {
   name: string;
-  dataIns: IfData[];
+  dataIns: IfDataIn[];
+  dataOuts: DataOut[];
+  ifDataOuts: IfDataOut[];
   properties?: Properties[];
   constraints?: Constraints[];
   conditions: Condition[];

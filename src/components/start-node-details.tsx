@@ -14,6 +14,7 @@ import { DataOut, dataTypes } from "@/types";
 import { NodeDetailsProps } from "./function-node-details";
 import BaseDetailsSheet from "./base-details-sheet";
 import { uuidv4 } from "@/lib/helpers";
+import InfoButton from "./info-button";
 
 export default function StartNodeDetails({
   selectedNode,
@@ -51,9 +52,13 @@ export default function StartNodeDetails({
         provided at runtime to the workflow.
       </p>
       {selectedNode.data.dataOuts.length > 0 && (
-        <div className="grid grid-cols-[3fr_1fr_30px] gap-2 mt-4">
+        <div className="grid grid-cols-[2fr_1fr_2fr_30px] gap-2 mt-4">
           <Label htmlFor="staticInputs">Name</Label>
           <Label htmlFor="staticInputs">Type</Label>
+          <p className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex gap-1">
+            Source
+            <InfoButton infoText="This specifies the name JOSN property in the input to the workflow." />
+          </p>
           <div />
           {selectedNode.data.dataOuts.map((output: DataOut, idx: number) => (
             <>
@@ -91,6 +96,19 @@ export default function StartNodeDetails({
                   ))}
                 </SelectContent>
               </Select>
+              <Input
+                key={"source" + idx}
+                id="staticInputsSource"
+                type="text"
+                placeholder="source"
+                value={output.startSource}
+                onChange={(e) => {
+                  selectedNode.data.dataOuts[idx].startSource = e.target.value;
+                  updateNode(selectedNode.id, {
+                    ...selectedNode.data,
+                  });
+                }}
+              />
               <Button
                 type="button"
                 variant="ghost"
@@ -124,7 +142,7 @@ export default function StartNodeDetails({
             ...selectedNode.data,
             dataOuts: [
               ...(selectedNode.data.dataOuts ?? []),
-              { id:uuidv4(), name: "", type: "" },
+              { id: uuidv4(), name: "", type: "" },
             ],
           })
         }

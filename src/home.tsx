@@ -20,24 +20,29 @@ import { WORKFLOW_KEY_PREFIX, getDateTimeString, uuidv4 } from "@/lib/helpers";
 
 import logo from "./apollo_logo.png";
 import { Workflow } from "./types";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "./components/ui/alert";
+
+const exapmleWorkflows = import.meta.glob("../example-wfs/*.json", {
+  eager: true,
+});
 
 interface HomeProps {
   selectWorkflow: (workflow: Workflow) => void;
 }
 
 export default function Home({ selectWorkflow }: HomeProps) {
-  const [workflows, setWorkflows] = useState<Workflow[]>([])
+  const [workflows, setWorkflows] = useState<Workflow[]>([]);
+  const uploadButtonRef = useRef<HTMLInputElement>(null);
   const reloadWorkflows = useCallback(() => {
-    const w=[];
+    const w = [];
     const savedWorkflowCount = localStorage.length;
     for (let index = 0; index < savedWorkflowCount; index++) {
       const key = localStorage.key(index);
       if (key?.startsWith(WORKFLOW_KEY_PREFIX))
         w.push(JSON.parse(localStorage.getItem(key) ?? ""));
     }
-    setWorkflows(w)
+    setWorkflows(w);
   }, []);
 
   useEffect(() => {
@@ -97,20 +102,29 @@ export default function Home({ selectWorkflow }: HomeProps) {
             </p>
           </div>
         </div>
-<Alert variant="destructive">
-  <Icons.terminal className="h-4 w-4" />
-  <AlertTitle>Heads up!</AlertTitle>
-  <AlertDescription>
-    This project is still in active development and may still have issus. If you find anything please open an issue in the <a href="https://github.com/Apollo-GUI/Apollo-GUI.github.io" target="_blank" className="font-bold">Github repository</a>.
-  </AlertDescription>
-</Alert>
+        <Alert variant="destructive">
+          <Icons.terminal className="h-4 w-4" />
+          <AlertTitle>Heads up!</AlertTitle>
+          <AlertDescription>
+            This project is still in active development and may still have
+            issus. If you find anything please open an issue in the{" "}
+            <a
+              href="https://github.com/Apollo-GUI/Apollo-GUI.github.io"
+              target="_blank"
+              className="font-bold"
+            >
+              Github repository
+            </a>
+            .
+          </AlertDescription>
+        </Alert>
         <div className="grid gap-4 grid-cols-3 items-start">
           <Card>
             <CardHeader className="flex flex-row justify-between items-center">
               <CardTitle className="mr-4">
                 Application Orchestration and Runtime Framework
               </CardTitle>
-              <img src={logo} className="max-w-[200px]"/>
+              <img src={logo} className="max-w-[200px]" />
             </CardHeader>
             <CardContent>
               <p className="my-4">
@@ -155,9 +169,38 @@ export default function Home({ selectWorkflow }: HomeProps) {
                   <Icons.add className="mr-2 h-4 w-4" />
                   New workflow
                 </Button>
-                <Button variant="outline" disabled>
+                <input
+                  type="file"
+                  ref={uploadButtonRef}
+                  className="hidden"
+                  onChange={(e) => {
+                    if (e.target.files?.length) {
+                      const file = e.target.files[0];
+                      const reader = new FileReader();
+                      reader.onload = (e) => {
+                        const workflow = JSON.parse(
+                          e.target?.result as string,
+                        ) as Workflow;
+                        workflow.id = WORKFLOW_KEY_PREFIX + uuidv4();
+                        workflow.lastSaved = null;
+                        localStorage.setItem(
+                          workflow.id,
+                          JSON.stringify(workflow),
+                        );
+                        reloadWorkflows();
+                      };
+                      reader.readAsText(file);
+                    }
+                  }}
+                />
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    uploadButtonRef.current?.click();
+                  }}
+                >
                   <Icons.import className="mr-2 h-4 w-4" />
-                  Import workflow
+                  Import graph
                 </Button>
               </div>
             </CardHeader>
@@ -198,7 +241,7 @@ export default function Home({ selectWorkflow }: HomeProps) {
                     ) : (
                       <TableRow className="hover:bg-white">
                         <TableCell
-                          className="h-[450px] items-center"
+                          className="h-[250px] items-center"
                           colSpan={3}
                         >
                           <div className="mx-auto flex max-w-[420px] flex-col items-center justify-center text-center">
@@ -223,6 +266,21 @@ export default function Home({ selectWorkflow }: HomeProps) {
                     )}
                   </TableBody>
                 </Table>
+              </div>
+              <h1 className="text-2xl font-bold pt-6 pb-4">
+                Example Workflows
+              </h1>
+              <div className="flex gap-2">
+                {Object.values(exapmleWorkflows)
+                  .map((workflow: any, idx) => (
+                    <Button
+                      key={idx}
+                      variant={"outline"}
+                      onClick={() => selectWorkflow(workflow)}
+                    >
+                      {workflow.name}
+                    </Button>
+                  ))}
               </div>
             </CardContent>
           </Card>

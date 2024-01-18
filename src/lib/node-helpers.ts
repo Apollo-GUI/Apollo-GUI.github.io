@@ -12,13 +12,13 @@ export function getDefaultData(type: ApolloNodeType) {
     case "start":
       return {
         name: "",
-        type: "string",
+        type: "start",
         dataOuts: [],
       };
     case "function":
       return {
         name: "",
-        type: "string",
+        type: "",
         value: "",
         dataOuts: [],
         dataIns: [],
@@ -26,14 +26,14 @@ export function getDefaultData(type: ApolloNodeType) {
     case "parallel":
       return {
         name: "",
-        type: "string",
+        type: "parallel",
         dataOuts: [],
         dataIns: [],
       };
     case "if":
       return {
         name: "",
-        type: "string",
+        type: "if",
         dataOuts: [],
         dataIns: [],
         conditions: [{}],
@@ -41,14 +41,15 @@ export function getDefaultData(type: ApolloNodeType) {
     case "while":
       return {
         name: "",
-        type: "string",
+        type: "while",
         dataOuts: [],
         dataIns: [],
+        conditions: [{}],
       };
     default:
       return {
         name: "end",
-        type: "string",
+        type: "end",
       };
   }
 }

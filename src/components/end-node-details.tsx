@@ -5,6 +5,7 @@ import { DataIn } from "@/types";
 import { NodeDetailsProps } from "./function-node-details";
 import BaseDetailsSheet from "./base-details-sheet";
 import { useDataVariables } from "@/lib/helpers";
+import { Input } from "./ui/input";
 
 export default function EndNodeDetails({
   selectedNode,
@@ -27,8 +28,23 @@ export default function EndNodeDetails({
       ):<></>}
 
       { selectedNode.data.dataIns?.length ? (selectedNode.data.dataIns.map((input: DataIn, idx: number) => (
-        <div key={input.id} className="flex items-center justify-between">
-          <p className="bg-slate-200 rounded px-4">{getFullDataOutName(input.source, input.id)}</p>
+        <div key={input.id} className="grid gap-2 grid-cols-[3fr_2fr_40px] items-center mt-2">
+          <p className="bg-slate-200 rounded px-4 mr-auto">{getFullDataOutName(input.source, input.id)}</p>
+
+              <Input
+                key={"rename"+idx.toString()}
+                id="rename"
+                type="text"
+                placeholder="(optinal rename)"
+                className="max-w-[200px]"
+                value={input.rename}
+                onChange={(e) => {
+                  selectedNode.data.dataIns[idx].rename = e.target.value;
+                  updateNode(selectedNode.id, {
+                    ...selectedNode.data,
+                  });
+                }}
+              />
           <Button
             type="button"
             variant="ghost"

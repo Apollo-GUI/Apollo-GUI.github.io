@@ -51,7 +51,10 @@ struct NodeInternals {
 pub struct InternalDataInOrOut {
     id: String,
     name: Option<String>,
+    rename: Option<String>,
     source: Option<String>,
+    #[serde(rename = "startSource")]
+    start_source: Option<String>,
     value: Option<String>,
     #[serde(rename = "type")]
     typ: Option<String>,

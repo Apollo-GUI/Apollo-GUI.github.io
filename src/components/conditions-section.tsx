@@ -17,7 +17,6 @@ import {
   SelectValue,
 } from "./ui/select";
 import { Condition, conditionTypes } from "@/types";
-import VariableValueSelector from "./variable-value-selector";
 
 export default function ConditionsSection({
   selectedNode,
@@ -32,37 +31,64 @@ export default function ConditionsSection({
         <InfoButton infoText="" />
       </div>
       <div className="grid gap-2 grid-cols-[2fr_1fr_2fr_40px]">
-        {selectedNode.data.conditions.map((condition:Condition, idx:number) => (
-          <>
-            <VariableValueSelector />
-            <Select
-              value={condition.type}
-              key={"type"+idx}
-              onValueChange={(e) => {
-                selectedNode.data.conditions[0].type = e;
-                updateNode(selectedNode.id, {
-                  ...selectedNode.data,
-                });
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {conditionTypes.map((type) => (
-                  <SelectItem key={type} value={type}>
-                    {type}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        {selectedNode.data.conditions.map(
+          (condition: Condition, idx: number) => (
+            <>
+              <Input
+                id="condition1"
+                type="text"
+                placeholder="value/variable"
+                value={condition.data1}
+                key={"type" + idx}
+                onChange={(e) => {
+                  selectedNode.data.conditions[idx].data1 = e.target.value;
+                  updateNode(selectedNode.id, {
+                    ...selectedNode.data,
+                  });
+                }}
+              />
+              <Select
+                value={condition.operator}
+                key={"type" + idx}
+                onValueChange={(e) => {
+                  selectedNode.data.conditions[idx].operator = e;
+                  updateNode(selectedNode.id, {
+                    ...selectedNode.data,
+                  });
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {conditionTypes.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-            <Input id="condition" type="text" placeholder="value/variable" />
-          </>
-        ))}
-        <Button variant="secondary" size="icon">
-          <Icons.options className="w-4 h-4" />
-        </Button>
+              <Input
+                id="condition2"
+                type="text"
+                placeholder="value/variable"
+                value={condition.data2}
+                key={"type" + idx}
+                onChange={(e) => {
+                  selectedNode.data.conditions[idx].data2 = e.target.value;
+                  updateNode(selectedNode.id, {
+                    ...selectedNode.data,
+                  });
+                }}
+              />
+
+              <Button variant="secondary" size="icon">
+                <Icons.options className="w-4 h-4" />
+              </Button>
+            </>
+          ),
+        )}
       </div>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -72,10 +98,30 @@ export default function ConditionsSection({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuItem>
+          <DropdownMenuItem
+            onSelect={() => {
+              selectedNode.data.conditions[
+                selectedNode.data.conditions.length - 1
+              ].combinedWith = "and";
+              selectedNode.data.conditions.push({});
+              updateNode(selectedNode.id, {
+                ...selectedNode.data,
+              });
+            }}
+          >
             Combine with&nbsp;<b>AND</b>
           </DropdownMenuItem>
-          <DropdownMenuItem>
+          <DropdownMenuItem
+            onSelect={() => {
+              selectedNode.data.conditions[
+                selectedNode.data.conditions.length - 1
+              ].combinedWith = "or";
+              selectedNode.data.conditions.push({});
+              updateNode(selectedNode.id, {
+                ...selectedNode.data,
+              });
+            }}
+          >
             Combine with&nbsp;<b>OR</b>
           </DropdownMenuItem>
         </DropdownMenuContent>

@@ -34,13 +34,24 @@ export default function FunctionNodeDetails({
           </Label>
           <InfoButton infoText="This specifies the name of the serverless function used. Based on this name the function to execute is looked up in the type mappings file by APOLLO." />
         </div>
-        <Input id="type" type="text" placeholder="type" />
+        <Input
+          id="type"
+          type="text"
+          placeholder="type"
+          onChange={(e) =>
+            updateNode(selectedNode.id, {
+              ...selectedNode.data,
+              type: e.target.value,
+            })
+          }
+          value={selectedNode.data.type}
+        />
       </div>
       <Separator className="my-4" />
       <DataInSection selectedNode={selectedNode} updateNode={updateNode} />
       <Separator className="my-4" />
       <DataOutSection selectedNode={selectedNode} updateNode={updateNode} />
-      <ParentSection selectedNode={selectedNode} updateNode={updateNode}/>
+      <ParentSection selectedNode={selectedNode} updateNode={updateNode} />
     </BaseDetailsSheet>
   );
 }

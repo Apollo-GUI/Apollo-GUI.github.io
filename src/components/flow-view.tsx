@@ -68,14 +68,16 @@ export default function FlowView({
       if (
         source?.id === target?.id &&
         target?.type !== "parallel" &&
-        target?.type !== "while"
+        target?.type !== "while"&&
+        target?.type !== "if"
+
       )
         return;
 
       const inputIndex = Number(params.sourceHandle?.substring(1));
       if (source && target && !isNaN(inputIndex)) {
         const input =
-          (source.type === "parallel" || source.type === "while") &&
+          (source.type === "parallel" || source.type === "while" ||source.type==="if") &&
           !params.sourceHandle?.startsWith("o")
             ? source.data.dataIns[inputIndex]
             : source.data.dataOuts[inputIndex];
@@ -85,7 +87,7 @@ export default function FlowView({
           )
         ) {
           if (
-            (target.type === "parallel" || target.type === "while") &&
+            (target.type === "parallel" || target.type === "while" || target.type ==="if") &&
             params.targetHandle === "oidefault"
           ) {
             updateNode(target.id, {
@@ -133,7 +135,7 @@ export default function FlowView({
           ...n,
           className:
             intersections.includes(n.id) &&
-            (n.type === "parallel" || n.type === "while") &&
+            (n.type === "parallel" || n.type === "while" || n.type ==="if") &&
             node.parentNode !== n.id
               ? "shadow-[0_0_50px_15px_rgba(0,0,0,0.3)] rounded-lg"
               : "",
@@ -148,7 +150,7 @@ export default function FlowView({
       if (node.type === "start" || node.type === "end") return;
       const intersections = getIntersectingNodes(node, false);
       const intersectedBlock = intersections.findLast(
-        (n: any) => n.type === "parallel" || n.type === "while",
+        (n: any) => n.type === "parallel" || n.type === "while" || n.type === "if",
       );
       if (intersectedBlock) {
         setNodes((ns) =>
@@ -197,7 +199,7 @@ export default function FlowView({
         type: type,
         position,
         style:
-          type == "parallel" || type == "while"
+          type == "parallel" || type == "while" || type == "if"
             ? { height: "250px", width: "250px" }
             : undefined,
         data: getDefaultData(type as ApolloNodeType),

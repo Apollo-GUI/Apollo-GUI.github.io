@@ -39,6 +39,7 @@ struct DataInOrOut {
     #[serde(skip)]
     id: String,
     name: String,
+    #[serde(rename = "type")]
     typ: String,
     source: Option<String>,
     properties: Option<Vec<PropertiesConstraintsDef>>,
@@ -51,6 +52,7 @@ struct Node {
     #[serde(skip)]
     id: String,
     name: String,
+    #[serde(rename = "type")]
     typ: String,
     #[serde(rename = "dataIns")]
     data_ins: Option<Vec<DataInOrOut>>,
@@ -87,14 +89,14 @@ enum ExportedFunction {
     },
     SequentialWhile {
         condition: Vec<Condition>,
-        loop_body: Vec<Node>,
+        loop_body: Vec<ExportedFunction>,
         #[serde(flatten)]
         node: Node,
     },
     SequentialFor {
         data_loops: Vec<DataLoop>,
         loop_counter: LoopCounter,
-        loop_body: Vec<Node>,
+        loop_body: Vec<ExportedFunction>,
         #[serde(flatten)]
         node: Node,
     },
@@ -108,23 +110,18 @@ enum Function {
     AtomicFunction,
     IfThenElse {
         condition: Vec<Condition>,
-        then: Vec<ExportedFunction>,
-        or_else: Vec<ExportedFunction>,
     },
     // Switch {
     // },
     ParallelFor {
         iterators: Vec<String>,
-        loop_body: Vec<Node>,
     },
     SequentialWhile {
         condition: Vec<Condition>,
-        loop_body: Vec<Node>,
     },
     SequentialFor {
         data_loops: Vec<DataLoop>,
         loop_counter: LoopCounter,
-        loop_body: Vec<Node>,
     },
     StartOrEnd,
 }
@@ -132,6 +129,7 @@ enum Function {
 #[derive(Serialize, Deserialize, Clone)]
 struct DataLoop {
     name: String,
+    #[serde(rename = "type")]
     typ: String,
     init_source: String,
     loop_source: String,
@@ -143,6 +141,7 @@ struct DataLoop {
 #[derive(Serialize, Deserialize, Clone)]
 struct LoopCounter {
     name: String,
+    #[serde(rename = "type")]
     typ: String,
     from: String,
     to: String,
@@ -153,6 +152,7 @@ struct LoopCounter {
 struct Condition {
     data1: String,
     data2: String,
+    #[serde(rename = "type")]
     typ: String,
     operator: ConditionOperator,
     negation: String,
@@ -212,51 +212,60 @@ fn parse_sub_flow(
                     false_branch.extend(parse_sub_flow(targets, node_map, edge_map, children_map));
                 }
                 res.push(ExportedFunction::IfThenElse {
-                    node: Node {
-                        id: node.id.to_string(),
-                        name: node.name.to_string(),
-                        typ: node.typ.to_string(),
-                        data_ins: node.data_ins.clone(),
-                        data_outs: node.data_outs.clone(),
-                        properties: node.properties.clone(),
-                        constraints: node.constraints.clone(),
-                        function: Function::IfThenElse {
-                            condition: condition.clone(),
-                            then: true_branch,
-                            or_else: false_branch,
-                        },
-                    },
+                    node: (*node).clone(),
                     condition,
-                    then: todo!(),
-                    or_else: todo!(),
+                    then: true_branch,
+                    or_else: false_branch,
                 })
             }
-            // Function::ParallelFor { iterators, .. } => {
-            //     if let Some(children) = children_map.get(node.id.as_str()) {
-            //         res.push(Node {
-            //             id: node.id.to_string(),
-            //             name: node.name.to_string(),
-            //             typ: node.typ.to_string(),
-            //             data_ins: node.data_ins.clone(),
-            //             data_outs: node.data_outs.clone(),
-            //             properties: node.properties.clone(),
-            //             constraints: node.constraints.clone(),
-            //             function: Function::ParallelFor {
-            //                 iterators: iterators.clone(),
-            //                 loop_body: parse_sub_flow(
-            //                     &children.iter().collect(),
-            //                     node_map,
-            //                     edge_map,
-            //                     children_map,
-            //                 ),
-            //             },
-            //         })
-            //     }
-            // }
-            Function::SequentialWhile { .. } => {}
-            Function::SequentialFor { .. } => {}
+            Function::ParallelFor { iterators, .. } => {
+                if let Some(children) = children_map.get(node.id.as_str()) {
+                    res.push(ExportedFunction::ParallelFor {
+                        node: (*node).clone(),
+                        loop_body: parse_sub_flow(
+                            &children.iter().collect(),
+                            node_map,
+                            edge_map,
+                            children_map,
+                        ),
+                        iterators,
+                    })
+                }
+            }
+            Function::SequentialWhile { condition, .. } => {
+                if let Some(children) = children_map.get(node.id.as_str()) {
+                    res.push(ExportedFunction::SequentialWhile {
+                        node: (*node).clone(),
+                        loop_body: parse_sub_flow(
+                            &children.iter().collect(),
+                            node_map,
+                            edge_map,
+                            children_map,
+                        ),
+                        condition,
+                    })
+                }
+            }
+            Function::SequentialFor {
+                data_loops,
+                loop_counter,
+                ..
+            } => {
+                if let Some(children) = children_map.get(node.id.as_str()) {
+                    res.push(ExportedFunction::SequentialFor {
+                        node: (*node).clone(),
+                        loop_body: parse_sub_flow(
+                            &children.iter().collect(),
+                            node_map,
+                            edge_map,
+                            children_map,
+                        ),
+                        data_loops,
+                        loop_counter,
+                    })
+                }
+            }
             Function::StartOrEnd { .. } => {}
-            Function::ParallelFor { .. } => {}
         }
     }
 
@@ -268,11 +277,16 @@ fn get_data_input(
     node_id: String,
     node_map: &HashMap<String, Node>,
 ) -> DataInOrOut {
+    let actual_name = data
+        .rename
+        .clone()
+        .unwrap_or(data.name.clone().unwrap_or("".into()));
+
     if let Some(source) = &data.source {
         if *source == node_id {
             DataInOrOut {
                 id: data.id.clone(),
-                name: data.name.clone().unwrap_or("".into()),
+                name: actual_name,
                 typ: data.typ.clone().unwrap_or("".into()),
                 source: data.value.clone(),
                 properties: None,
@@ -291,7 +305,7 @@ fn get_data_input(
                 .expect("no data outs found");
             DataInOrOut {
                 id: data.id.clone(),
-                name: data_out.name.clone(),
+                name: actual_name,
                 typ: data_out.typ.clone(),
                 source: Some(source_node.name.clone() + "/" + &data_out.name.clone()),
                 properties: None,
@@ -301,9 +315,9 @@ fn get_data_input(
     } else {
         DataInOrOut {
             id: data.id.clone(),
-            name: data.name.clone().unwrap_or("".into()),
+            name: actual_name,
             typ: data.typ.clone().unwrap_or("".into()),
-            source: None,
+            source: data.start_source.clone(),
             properties: None,
             constraints: None,
         }
@@ -339,19 +353,9 @@ pub fn export_from_flow(workflow: Workflow) -> ApolloYaml {
                     "function" => Function::AtomicFunction,
                     "start" => Function::StartOrEnd,
                     "end" => Function::StartOrEnd,
-                    "if" => Function::IfThenElse {
-                        condition: vec![],
-                        then: vec![],
-                        or_else: vec![],
-                    },
-                    "parallel_for" => Function::ParallelFor {
-                        iterators: vec![],
-                        loop_body: vec![],
-                    },
-                    "sequential_while" => Function::SequentialWhile {
-                        condition: vec![],
-                        loop_body: vec![],
-                    },
+                    "if" => Function::IfThenElse { condition: vec![] },
+                    "parallel_for" => Function::ParallelFor { iterators: vec![] },
+                    "sequential_while" => Function::SequentialWhile { condition: vec![] },
                     _ => panic!("unknown or unimplemented node type"),
                 },
             },

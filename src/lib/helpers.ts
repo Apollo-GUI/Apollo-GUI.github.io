@@ -52,6 +52,7 @@ export function useDataVariables() {
 
   return {
     getDataInName: (nodeId: string, input: DataIn) => {
+      if (input.rename) return input.rename;
       return input.source === nodeId
         ? input.name
         : getNode(input.source)?.data.dataOuts.find(
@@ -72,7 +73,7 @@ export function useDataVariables() {
         parent = getNode(parent?.parentNode);
       }
       return (
-        (parent?.data.name ?? node?.data.name) +
+        (parent?.type!=="if" && parent?.data.name ?  parent?.data.name : node?.data.name) +
         "/" +
         node?.data.dataOuts.find((e: DataOut) => e.id === dataId)?.name
       );
