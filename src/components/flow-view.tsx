@@ -14,7 +14,7 @@ import ReactFlow, {
   useUpdateNodeInternals,
 } from "reactflow";
 import { getDefaultData } from "../lib/node-helpers";
-import { ApolloNodeType, DataIn } from "@/types";
+import { ApolloNodeType, DataIn, DataOut } from "@/types";
 import FunctionNode from "./nodes/function-node";
 import StartNode from "./nodes/start-node";
 import EndNode from "./nodes/end-node";
@@ -63,36 +63,41 @@ export default function FlowView({
 
   const onConnect = useCallback(
     (params: Connection) => {
+
+      console.log(params)
       const source = nodes.find((n) => n.id === params.source);
       const target = nodes.find((n) => n.id === params.target);
       if (
         source?.id === target?.id &&
         target?.type !== "parallel" &&
-        target?.type !== "while"&&
+        target?.type !== "while" &&
         target?.type !== "if"
-
       )
         return;
 
       const inputIndex = Number(params.sourceHandle?.substring(1));
       if (source && target && !isNaN(inputIndex)) {
         let input: DataIn;
-        if(source.type==="if" && params.sourceHandle?.startsWith("o")){
+        if (source.type === "if" && params.sourceHandle?.startsWith("o")) {
           input = source.data.ifDataOuts[inputIndex];
-        }else{
-        input =
-          (source.type === "parallel" || source.type === "while" ||source.type==="if") &&
-          !params.sourceHandle?.startsWith("o")
-            ? source.data.dataIns[inputIndex]
-            : source.data.dataOuts[inputIndex];
-}
+        } else {
+          input =
+            (source.type === "parallel" ||
+              source.type === "while" ||
+              source.type === "if") &&
+            !params.sourceHandle?.startsWith("o")
+              ? source.data.dataIns[inputIndex]
+              : source.data.dataOuts[inputIndex];
+        }
         if (
           !target.data.dataIns?.find(
             (currentInputs: DataIn) => currentInputs.id === input.id,
           )
         ) {
           if (
-            (target.type === "parallel" || target.type === "while" || target.type ==="if") &&
+            (target.type === "parallel" ||
+              target.type === "while" ||
+              target.type === "if") &&
             params.targetHandle === "oidefault"
           ) {
             updateNode(target.id, {
@@ -118,6 +123,22 @@ export default function FlowView({
             });
           }
           updateNodeInternals(target.id);
+        } else if (
+          target.type === "if" &&
+          !target.data.dataOuts?.find((dout: DataOut) => dout.id === input.id)
+        ) {
+          updateNode(target.id, {
+            ...target.data,
+            dataOuts: [
+              ...(target.data.dataOuts ?? []),
+              {
+                id: input.id,
+                source: input.source ?? source.id,
+              },
+            ],
+          });
+
+          updateNodeInternals(target.id);
         }
       }
       setEdges((eds) => addEdge(params, eds));
@@ -140,7 +161,7 @@ export default function FlowView({
           ...n,
           className:
             intersections.includes(n.id) &&
-            (n.type === "parallel" || n.type === "while" || n.type ==="if") &&
+            (n.type === "parallel" || n.type === "while" || n.type === "if") &&
             node.parentNode !== n.id
               ? "shadow-[0_0_50px_15px_rgba(0,0,0,0.3)] rounded-lg"
               : "",
@@ -155,7 +176,8 @@ export default function FlowView({
       if (node.type === "start" || node.type === "end") return;
       const intersections = getIntersectingNodes(node, false);
       const intersectedBlock = intersections.findLast(
-        (n: any) => n.type === "parallel" || n.type === "while" || n.type === "if",
+        (n: any) =>
+          n.type === "parallel" || n.type === "while" || n.type === "if",
       );
       if (intersectedBlock) {
         setNodes((ns) =>

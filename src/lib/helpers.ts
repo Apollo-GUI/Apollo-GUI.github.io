@@ -60,7 +60,7 @@ export function useDataVariables() {
         node?.type === "if" ? node?.data.ifDataOuts : node?.data.dataOuts;
       return input.source === nodeId
         ? input.name
-        : nodeOutBase.find((e: DataOut) => e.id === input.id)?.name;
+        : nodeOutBase?.find((e: DataOut) => e.id === input.id)?.name;
     },
     getDataOutName: (output: DataOut) => {
       if (output.source === undefined) return output.name;
@@ -85,7 +85,7 @@ export function useDataVariables() {
           ? parent?.data.name
           : node?.data.name) +
         "/" +
-        nodeOutBase.find((e: DataOut) => e.id === dataId)?.name
+        nodeOutBase?.find((e: DataOut) => e.id === dataId)?.name
       );
     },
     getTypeRec: (nodeId: string, dataId: string) => {
@@ -97,7 +97,7 @@ export function useDataVariables() {
       const nodeOutBase =
         node?.type === "if" ? node.data.ifDataOuts : node?.data.dataOuts;
 
-      return nodeOutBase.find((e: DataOut) => e.id === dataId)?.type;
+      return nodeOutBase?.find((e: DataOut) => e.id === dataId)?.type;
     },
   };
 }

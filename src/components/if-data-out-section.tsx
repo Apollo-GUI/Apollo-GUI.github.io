@@ -6,7 +6,7 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import { UpdateNodeSectionProps } from "./data-in-section";
 import { useDataVariables, uuidv4 } from "@/lib/helpers";
-import { useUpdateNodeInternals } from "reactflow";
+import { useReactFlow, useUpdateNodeInternals } from "reactflow";
 import { Popover, PopoverContent } from "./ui/popover";
 import { PopoverTrigger } from "@radix-ui/react-popover";
 import { Separator } from "./ui/separator";
@@ -106,6 +106,8 @@ function IfInternalVariableSelector({
 }: UpdateNodeSectionProps & { ifNodeIndex: number }) {
   const updateNodeInternals = useUpdateNodeInternals();
   const ifNode = selectedNode.data as IfNode;
+
+  const { getNode } = useReactFlow();
   const { getTypeRec, getFullDataOutName } = useDataVariables();
   return (
     <Popover>
@@ -154,58 +156,65 @@ function IfInternalVariableSelector({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[250px] p-0" align="center">
-        {ifNode.dataOuts.length == 0 ? (
+        {ifNode.dataOuts.filter((n) => getNode(n.source ?? "") != undefined)
+          .length == 0 ? (
           <div className="flex text-sm text-muted-foreground items-center p-2">
             <Icons.info className="min-w-[1rem] h-4 mr-3" />
             No data connected to the 'Outputs' section of the if condition
           </div>
         ) : (
-          ifNode.dataOuts.map((option, i) => {
-            const isSelected = ifNode.ifDataOuts[ifNodeIndex].sources?.find(
-              (s) => s == option.id,
-            );
+          ifNode.dataOuts
+            .filter((n) => getNode(n.source ?? "") != undefined)
+            .map((option, i) => {
+              const isSelected = ifNode.ifDataOuts[ifNodeIndex].sources?.find(
+                (s) => s == option.id,
+              );
 
-            return (
-              <div
-                key={(option.name ?? "") + i}
-                className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-muted"
-                onClick={() => {
-                  if (isSelected) {
-                    ifNode.ifDataOuts[ifNodeIndex].sources = ifNode.ifDataOuts[
-                      ifNodeIndex
-                    ].sources?.filter((s) => s !== option.id);
-                    updateNode(selectedNode.id, {
-                      ...selectedNode.data,
-                    });
-
-                    updateNodeInternals(selectedNode.id);
-                  } else {
-                    ifNode.ifDataOuts[ifNodeIndex].type = getTypeRec(option.source ?? "", option.id);
-                    ifNode.ifDataOuts[ifNodeIndex].sources?.push(option.id);
-                    updateNode(selectedNode.id, {
-                      ...selectedNode.data,
-                    });
-
-                    updateNodeInternals(selectedNode.id);
-                  }
-                }}
-              >
+              return (
                 <div
-                  className={cn(
-                    "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
-                    isSelected
-                      ? "bg-primary text-primary-foreground"
-                      : "opacity-50 [&_svg]:invisible",
-                  )}
+                  key={(option.name ?? "") + i}
+                  className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none aria-selected:bg-accent aria-selected:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 hover:bg-muted"
+                  onClick={() => {
+                    if (isSelected) {
+                      ifNode.ifDataOuts[ifNodeIndex].sources =
+                        ifNode.ifDataOuts[ifNodeIndex].sources?.filter(
+                          (s) => s !== option.id,
+                        );
+                      updateNode(selectedNode.id, {
+                        ...selectedNode.data,
+                      });
+
+                      updateNodeInternals(selectedNode.id);
+                    } else {
+                      ifNode.ifDataOuts[ifNodeIndex].type = getTypeRec(
+                        option.source ?? "",
+                        option.id,
+                      );
+                      ifNode.ifDataOuts[ifNodeIndex].sources?.push(option.id);
+                      updateNode(selectedNode.id, {
+                        ...selectedNode.data,
+                      });
+
+                      updateNodeInternals(selectedNode.id);
+                    }
+                  }}
                 >
-                  <Icons.check className={cn("h-4 w-4")} />
+                  <div
+                    className={cn(
+                      "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
+                      isSelected
+                        ? "bg-primary text-primary-foreground"
+                        : "opacity-50 [&_svg]:invisible",
+                    )}
+                  >
+                    <Icons.check className={cn("h-4 w-4")} />
+                  </div>
+                  <span>
+                    {getFullDataOutName(option.source ?? "", option.id)}
+                  </span>
                 </div>
-                <span>
-                  {getFullDataOutName(option.source ?? "", option.id)}
-                </span>
-              </div>
-            );
-          })
+              );
+            })
         )}
       </PopoverContent>
     </Popover>
