@@ -8,7 +8,7 @@ export function uuidv4() {
     (
       Number(c) ^
       (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (Number(c) / 4)))
-    ).toString(16)
+    ).toString(16),
   );
 }
 
@@ -19,12 +19,12 @@ export function getDateTimeString(date: Date | string) {
 
 export function useLeavePage(
   selectedWorkflow: Workflow,
-  setSelectedWorkflow: (workflow: Workflow | null) => void
+  setSelectedWorkflow: (workflow: Workflow | null) => void,
 ) {
   const { toObject } = useReactFlow();
   return () => {
     const oldData = JSON.parse(
-      localStorage.getItem(selectedWorkflow.id) ?? "{}"
+      localStorage.getItem(selectedWorkflow.id) ?? "{}",
     ).data;
     const newData = toObject();
     if (
@@ -37,7 +37,7 @@ export function useLeavePage(
       return;
     }
     const res = window.confirm(
-      "You have unsaved changes! Do you really want to leave?"
+      "You have unsaved changes! Do you really want to leave?",
     );
     if (res) {
       setSelectedWorkflow(null);
@@ -53,18 +53,23 @@ export function useDataVariables() {
   return {
     getDataInName: (nodeId: string, input: DataIn) => {
       if (input.rename) return input.rename;
+
+      const node = getNode(input.source);
+
+      const nodeOutBase =
+        node?.type === "if" ? node?.data.ifDataOuts : node?.data.dataOuts;
       return input.source === nodeId
         ? input.name
-        : getNode(input.source)?.data.dataOuts.find(
-            (e: DataOut) => e.id === input.id
-          )?.name;
+        : nodeOutBase.find((e: DataOut) => e.id === input.id)?.name;
     },
     getDataOutName: (output: DataOut) => {
-      return output.source === undefined
-        ? output.name
-        : getNode(output.source)?.data.dataOuts.find(
-            (e: DataIn) => e.id === output.id
-          )?.name;
+      if (output.source === undefined) return output.name;
+      const node = getNode(output.source);
+
+      const nodeOutBase =
+        node?.type === "if" ? node?.data.ifDataOuts : node?.data.dataOuts;
+
+      return nodeOutBase?.find((e: DataIn) => e.id === output.id)?.name;
     },
     getFullDataOutName: (nodeId: string, dataId: string) => {
       const node = getNode(nodeId);
@@ -72,11 +77,27 @@ export function useDataVariables() {
       while (parent?.parentNode !== undefined) {
         parent = getNode(parent?.parentNode);
       }
+      const nodeOutBase =
+        node?.type === "if" ? node.data.ifDataOuts : node?.data.dataOuts;
+
       return (
-        (parent?.type!=="if" && parent?.data.name ?  parent?.data.name : node?.data.name) +
+        (parent?.type !== "if" && parent?.data.name
+          ? parent?.data.name
+          : node?.data.name) +
         "/" +
-        node?.data.dataOuts.find((e: DataOut) => e.id === dataId)?.name
+        nodeOutBase.find((e: DataOut) => e.id === dataId)?.name
       );
+    },
+    getTypeRec: (nodeId: string, dataId: string) => {
+      const node = getNode(nodeId);
+      let parent = node?.parentNode ? node : undefined;
+      while (parent?.parentNode !== undefined) {
+        parent = getNode(parent?.parentNode);
+      }
+      const nodeOutBase =
+        node?.type === "if" ? node.data.ifDataOuts : node?.data.dataOuts;
+
+      return nodeOutBase.find((e: DataOut) => e.id === dataId)?.type;
     },
   };
 }

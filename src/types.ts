@@ -136,6 +136,7 @@ export type IfDataIn = DataIn & {
 export type IfDataOut = {
   id: string;
   name?: string;
+  type: string;
   sources?: string[];
   properties?: Properties[];
   constraints?: Constraints[];

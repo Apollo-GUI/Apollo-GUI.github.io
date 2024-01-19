@@ -106,7 +106,7 @@ function IfInternalVariableSelector({
 }: UpdateNodeSectionProps & { ifNodeIndex: number }) {
   const updateNodeInternals = useUpdateNodeInternals();
   const ifNode = selectedNode.data as IfNode;
-  const { getFullDataOutName } = useDataVariables();
+  const { getTypeRec, getFullDataOutName } = useDataVariables();
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -180,6 +180,7 @@ function IfInternalVariableSelector({
 
                     updateNodeInternals(selectedNode.id);
                   } else {
+                    ifNode.ifDataOuts[ifNodeIndex].type = getTypeRec(option.source ?? "", option.id);
                     ifNode.ifDataOuts[ifNodeIndex].sources?.push(option.id);
                     updateNode(selectedNode.id, {
                       ...selectedNode.data,

@@ -76,11 +76,16 @@ export default function FlowView({
 
       const inputIndex = Number(params.sourceHandle?.substring(1));
       if (source && target && !isNaN(inputIndex)) {
-        const input =
+        let input: DataIn;
+        if(source.type==="if" && params.sourceHandle?.startsWith("o")){
+          input = source.data.ifDataOuts[inputIndex];
+        }else{
+        input =
           (source.type === "parallel" || source.type === "while" ||source.type==="if") &&
           !params.sourceHandle?.startsWith("o")
             ? source.data.dataIns[inputIndex]
             : source.data.dataOuts[inputIndex];
+}
         if (
           !target.data.dataIns?.find(
             (currentInputs: DataIn) => currentInputs.id === input.id,

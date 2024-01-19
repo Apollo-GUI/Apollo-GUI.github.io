@@ -23,19 +23,16 @@ export default function DataInSection({
   selectedNode,
   updateNode,
 }: UpdateNodeSectionProps) {
-
   const { getFullDataOutName } = useDataVariables();
   const updateNodeInternals = useUpdateNodeInternals();
 
   const staticInputs = selectedNode.data.dataIns?.filter(
-    (i: DataIn) => i.source === selectedNode.id
+    (i: DataIn) => i.source === selectedNode.id,
   );
   const parentInputs = selectedNode.data.dataIns?.filter(
-    (i: DataIn) => i.source !== selectedNode.id
+    (i: DataIn) => i.source !== selectedNode.id,
   );
 
-  const staticInputsOffset =
-    selectedNode.data.dataIns?.length - staticInputs?.length;
   return (
     <>
       <div className="flex items-center">
@@ -53,25 +50,31 @@ export default function DataInSection({
           <h1 className="text-sm font-medium leading-none mt-2">
             Input from parents
           </h1>
-          {parentInputs.map((input: DataIn, idx: number) => (
+          {parentInputs.map((input: DataIn) => (
             <div
-              key={idx.toString()}
+              key={input.id}
               className="grid gap-2 grid-cols-[3fr_2fr_40px] items-center mt-2"
             >
-              <p className="bg-slate-200 rounded px-4 mr-auto">{getFullDataOutName(input.source, input.id)}</p>
+              <p className="bg-slate-200 rounded px-4 mr-auto">
+                {getFullDataOutName(input.source, input.id)}
+              </p>
 
               <Input
-                key={"rename"+idx.toString()}
+                key={"rename" + input.id}
                 id="rename"
                 type="text"
                 placeholder="(optinal rename)"
                 className="max-w-[200px]"
                 value={input.rename}
                 onChange={(e) => {
-                  selectedNode.data.dataIns[idx].rename = e.target.value;
+                  const index = selectedNode.data.dataIns.findIndex(
+                    (el: any) => el.id === input.id,
+                  );
+                  selectedNode.data.dataIns[index].rename = e.target.value;
                   updateNode(selectedNode.id, {
                     ...selectedNode.data,
                   });
+                    updateNodeInternals(selectedNode.id);
                 }}
               />
               <Button type="button" variant="ghost" size="icon">
@@ -82,7 +85,7 @@ export default function DataInSection({
                     updateNode(selectedNode.id, {
                       ...selectedNode.data,
                       dataIns: selectedNode.data.dataIns.filter(
-                        (_: DataIn, index: number) => index !== idx
+                        (d: DataIn) => d.id !== input.id,
                       ),
                     });
                     updateNodeInternals(selectedNode.id);
@@ -98,28 +101,34 @@ export default function DataInSection({
           <Label htmlFor="staticInputs">Static inputs</Label>
 
           <div className="grid gap-2 grid-cols-[2fr_1fr_2fr_40px] mt-2">
-            {staticInputs.map((input: DataIn, idx: number) => (
+            {staticInputs.map((input: DataIn) => (
               <>
                 <Input
-                  key={"name" + idx}
+                  key={"name"+input.id}
                   id="staticInputs"
                   type="text"
                   placeholder="variable name"
                   value={input.name}
                   onChange={(e) => {
-                    selectedNode.data.dataIns[staticInputsOffset + idx].name =
-                      e.target.value;
+                    const index = selectedNode.data.dataIns.findIndex(
+                      (el: any) => el.id === input.id,
+                    );
+                    selectedNode.data.dataIns[index].name = e.target.value;
                     updateNode(selectedNode.id, {
                       ...selectedNode.data,
                     });
+
+                    updateNodeInternals(selectedNode.id);
                   }}
                 />
                 <Select
                   value={input.type}
-                  key={"type" + idx}
+                  key={"type" + input.id}
                   onValueChange={(e) => {
-                    selectedNode.data.dataIns[staticInputsOffset + idx].type =
-                      e;
+                    const index = selectedNode.data.dataIns.findIndex(
+                      (el: any) => el.id === input.id,
+                    );
+                    selectedNode.data.dataIns[index].type = e;
                     updateNode(selectedNode.id, {
                       ...selectedNode.data,
                     });
@@ -137,14 +146,16 @@ export default function DataInSection({
                   </SelectContent>
                 </Select>
                 <Input
-                  key={"value" + idx}
+                  key={"value" + input.id}
                   id="value"
                   type="text"
                   placeholder="value"
                   value={input.value}
                   onChange={(e) => {
-                    selectedNode.data.dataIns[staticInputsOffset + idx].value =
-                      e.target.value;
+                    const index = selectedNode.data.dataIns.findIndex(
+                      (el: any) => el.id === input.id,
+                    );
+                    selectedNode.data.dataIns[index].value = e.target.value;
                     updateNode(selectedNode.id, {
                       ...selectedNode.data,
                     });
@@ -154,17 +165,17 @@ export default function DataInSection({
                 <Button
                   variant="ghost"
                   size="icon"
-                  key={"del" + idx}
-                  onClick={() =>{
+                  key={"del" + input.id}
+                  onClick={() => {
                     updateNode(selectedNode.id, {
                       ...selectedNode.data,
                       dataIns: selectedNode.data.dataIns.filter(
-                        (_: DataIn, index: number) =>
-                          index !== staticInputsOffset + idx
+                        (d: DataIn) =>
+                          d.id !== input.id,
                       ),
-                    })
-                    updateNodeInternals(selectedNode.id);}
-                  }
+                    });
+                    updateNodeInternals(selectedNode.id);
+                  }}
                 >
                   <Icons.remove
                     className="w-5 text-destructive"
@@ -180,16 +191,16 @@ export default function DataInSection({
         variant="outline"
         size="sm"
         className="mt-2"
-        onClick={() =>{
+        onClick={() => {
           updateNode(selectedNode.id, {
             ...selectedNode.data,
             dataIns: [
               ...(selectedNode.data.dataIns ?? []),
-              { id:uuidv4(), name: "", type: "", source:selectedNode.id },
+              { id: uuidv4(), name: "", type: "", source: selectedNode.id },
             ],
-          })
-          updateNodeInternals(selectedNode.id);}
-        }
+          });
+          updateNodeInternals(selectedNode.id);
+        }}
       >
         <Icons.add className="w-4 h-4 mr-2" /> Add static inputs
       </Button>

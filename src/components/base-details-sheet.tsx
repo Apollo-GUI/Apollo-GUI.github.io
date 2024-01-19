@@ -1,7 +1,6 @@
 import { Icons } from "./icons";
 import DeleteNodeButton from "./delete-node-button";
 import { Node } from "reactflow";
-import { ScrollArea } from "./ui/scroll-area";
 
 export interface BaseDetailsSheetProps {
   title: string;

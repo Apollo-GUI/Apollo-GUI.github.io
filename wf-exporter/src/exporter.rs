@@ -391,26 +391,45 @@ fn get_data_input(
             }
         } else {
             let source_node = node_map.get(source).expect("source node not found");
-            let data_out = source_node
-                .internal_data_outs
-                .as_ref()
-                .map(|d| {
-                    d.iter()
-                        .find(|d| *d.id == data.id)
-                        .expect("output data not found")
-                })
-                .expect("no data outs found");
-            DataInOrOut {
-                id: data.id.clone(),
-                name: actual_name,
-                typ: data_out.typ.clone().unwrap_or("string".to_string()),
-                source: Some(
-                    source_node.name.clone()
-                        + "/"
-                        + &data_out.name.clone().unwrap_or("".to_string()),
-                ),
-                properties: None,
-                constraints: None,
+            if let Function::IfThenElse { if_data_outs, .. } = &source_node.function {
+                let data_out = if_data_outs
+                    .as_ref()
+                    .map(|d| {
+                        d.iter()
+                            .find(|d| *d.id == data.id)
+                            .expect("output data not found")
+                    })
+                    .expect("no data outs found");
+                DataInOrOut {
+                    id: data.id.clone(),
+                    name: actual_name,
+                    typ: data_out.typ.clone(),
+                    source: Some(source_node.name.clone() + "/" + &data_out.name.clone()),
+                    properties: None,
+                    constraints: None,
+                }
+            } else {
+                let data_out = source_node
+                    .internal_data_outs
+                    .as_ref()
+                    .map(|d| {
+                        d.iter()
+                            .find(|d| *d.id == data.id)
+                            .expect("output data not found")
+                    })
+                    .expect("no data outs found");
+                DataInOrOut {
+                    id: data.id.clone(),
+                    name: actual_name,
+                    typ: data_out.typ.clone().unwrap_or("string".to_string()),
+                    source: Some(
+                        source_node.name.clone()
+                            + "/"
+                            + &data_out.name.clone().unwrap_or("".to_string()),
+                    ),
+                    properties: None,
+                    constraints: None,
+                }
             }
         }
     } else {

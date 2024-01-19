@@ -55,6 +55,8 @@ struct NodeInternals {
 pub struct IfDataOut {
     id: String,
     name: String,
+    #[serde(rename = "type")]
+    typ: String,
     sources: Vec<String>,
 }
 

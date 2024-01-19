@@ -1,12 +1,10 @@
-import { Handle, Position, NodeProps, NodeResizer, useNodeId } from "reactflow";
+import { Handle, Position, NodeProps, NodeResizer  } from "reactflow";
 import { NodeIcons } from "../icons";
 import { IfNode } from "@/types";
 import { useDataVariables } from "@/lib/helpers";
-import { Separator } from "../ui/separator";
 
 export default function IfNode({ data, selected }: NodeProps<IfNode>) {
-  const { getDataInName, getDataOutName } = useDataVariables();
-  const nodeId = useNodeId() ?? "";
+  const {  getDataOutName } = useDataVariables();
   return (
     <div className="flex flex-col justify-between items-center h-full border-2 rounded-lg text-center bg-orange-500 -z-10 bg-opacity-10">
       <NodeResizer isVisible={selected} minWidth={100} minHeight={100} />
@@ -73,7 +71,7 @@ export default function IfNode({ data, selected }: NodeProps<IfNode>) {
             {data.ifDataOuts?.map((dataOut, idx) => (
               <div key={idx}>
                 <p className="text-xs text-slate-700 bg-slate-200 rounded px-2 h-[16px]">
-                  {getDataOutName(dataOut)}
+                  {getDataOutName(dataOut as any)}
                 </p>
                 <Handle
                   type="source"
