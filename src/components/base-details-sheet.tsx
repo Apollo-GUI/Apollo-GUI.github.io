@@ -1,6 +1,7 @@
 import { Icons } from "./icons";
 import DeleteNodeButton from "./delete-node-button";
 import { Node } from "reactflow";
+import { ScrollArea } from "./ui/scroll-area";
 
 export interface BaseDetailsSheetProps {
   title: string;
@@ -18,7 +19,7 @@ export default function BaseDetailsSheet({
   close,
 }: BaseDetailsSheetProps) {
   return (
-    <>
+    <div className="overflow-y-scroll max-h-[100vh] p-6">
       <div className="flex justify-between items-center mr-12">
         <div className="text-slate-500 max-w-[400px]">
           <h1 className="text-lg font-semibold text-foreground">{title}</h1>
@@ -36,6 +37,6 @@ export default function BaseDetailsSheet({
         <span className="sr-only">Close</span>
       </div>
       {children}
-    </>
+    </div>
   );
 }

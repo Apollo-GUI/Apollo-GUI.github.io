@@ -105,7 +105,7 @@ export default function Editor({
       >
         <div
           className={cn(
-            "p-6 fixed -right-[600px] w-[600px] border-l shadow-md min-h-screen ease-in-out transition-all duration-300",
+            "fixed -right-[600px] w-[600px] border-l shadow-md min-h-screen ease-in-out transition-all duration-300",
             selectedNode && "right-0"
           )}
         >

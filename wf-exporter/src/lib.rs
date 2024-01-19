@@ -3,7 +3,7 @@ mod utils;
 
 use exporter::export_from_flow;
 use gloo_utils::format::JsValueSerdeExt;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use utils::set_panic_hook;
 use wasm_bindgen::prelude::*;
 
@@ -45,9 +45,32 @@ struct NodeInternals {
     data_ins: Option<Vec<InternalDataInOrOut>>,
     #[serde(rename = "dataOuts")]
     data_outs: Option<Vec<InternalDataInOrOut>>,
+
+    #[serde(rename = "ifDataOuts")]
+    if_data_outs: Option<Vec<IfDataOut>>,
+    conditions: Option<Vec<Condition>>,
+}
+
+#[derive(Deserialize, Serialize, Clone)]
+pub struct IfDataOut {
+    id: String,
+    name: String,
+    sources: Vec<String>,
 }
 
 #[derive(Deserialize)]
+pub struct Condition {
+    data1: String,
+    data2: String,
+    #[serde(rename = "type")]
+    typ: Option<String>,
+    operator: String,
+    negation: Option<String>,
+    #[serde(rename = "combinedWith")]
+    combined_with: Option<String>,
+}
+
+#[derive(Deserialize, Clone)]
 pub struct InternalDataInOrOut {
     id: String,
     name: Option<String>,
