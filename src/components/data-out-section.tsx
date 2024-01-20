@@ -14,6 +14,7 @@ import {
 import { UpdateNodeSectionProps } from "./data-in-section";
 import { useDataVariables, uuidv4 } from "@/lib/helpers";
 import { useReactFlow, useUpdateNodeInternals } from "reactflow";
+import PropteriesConstraintsDialog from "./properties-constraints-dialog";
 
 export default function DataOutSection({
   selectedNode,
@@ -35,9 +36,10 @@ export default function DataOutSection({
         />
       </div>
       {selectedNode.data.dataOuts?.length > 0 && (
-        <div className="grid grid-cols-[3fr_1fr_30px] gap-2 mt-4">
+        <div className="grid grid-cols-[3fr_1fr_25px_25px] items-center gap-2 mt-4">
           <Label>Name</Label>
           <Label>Type</Label>
+          <div />
           <div />
           {selectedNode.data.dataOuts.map((output: DataOut, idx: number) => (
             <>
@@ -120,10 +122,26 @@ export default function DataOutSection({
                   </Select>
                 </>
               )}
+
+              <PropteriesConstraintsDialog
+                properties={output.properties}
+                constraints={output.constraints}
+                onChange={(properties, constraints) => {
+                  const index = selectedNode.data.dataOuts.findIndex(
+                    (el: any) => el.id === output.id,
+                  );
+                  selectedNode.data.dataOuts[index].properties = properties;
+                  selectedNode.data.dataOuts[index].constraints = constraints;
+                  updateNode(selectedNode.id, {
+                    ...selectedNode.data,
+                  });
+                }}
+              />
               <Button
                 type="button"
                 variant="ghost"
                 size="icon"
+                className="w-8 p-0"
                 key={"del" + idx}
                 onClick={() => {
                   updateNode(selectedNode.id, {

@@ -36,8 +36,8 @@ export type DataIn = {
   source: string;
   value?: string;
   rename?: string;
-  properties?: Properties[];
-  constraints?: Constraints[];
+  properties?: Property[];
+  constraints?: Constraint[];
 };
 
 export type DataOut = {
@@ -46,16 +46,17 @@ export type DataOut = {
   type?: DataType;
   source?: string;
   startSource?: string;
-  properties?: Properties[];
-  constraints?: Constraints[];
+  properties?: Property[];
+  constraints?: Constraint[];
 };
 
 export type Condition = {
+  id: string;
   data1: string;
   data2: string;
   type: string;
   operator: string;
-  negation: string;
+  negation: boolean;
   combinedWith: string;
 };
 
@@ -74,12 +75,12 @@ export type DataOutOption = {
   label: string;
 };
 
-export type Properties = {
+export type Property = {
   name: string;
   value: string;
 };
 
-export type Constraints = {
+export type Constraint = {
   name: string;
   value: string;
 };
@@ -95,8 +96,8 @@ export type FunctionNode = {
   type: string;
   dataIns: DataIn[];
   dataOuts: DataOut[];
-  properties?: Properties[];
-  constraints?: Constraints[];
+  properties?: Property[];
+  constraints?: Constraint[];
 };
 
 export type StartNode = {
@@ -114,8 +115,8 @@ export type ParallelNode = {
   name: string;
   dataIns: DataIn[];
   dataOuts: DataOut[];
-  properties?: Properties[];
-  constraints?: Constraints[];
+  properties?: Property[];
+  constraints?: Constraint[];
   iterator: Iterator;
 };
 
@@ -123,9 +124,9 @@ export type WhileNode = {
   name: string;
   dataIns: DataIn[];
   dataOuts: DataOut[];
-  properties?: Properties[];
-  constraints?: Constraints[];
-  condition: Condition;
+  properties?: Property[];
+  constraints?: Constraint[];
+  conditions: Condition[];
 };
 
 export type IfDataIn = DataIn & {
@@ -138,8 +139,8 @@ export type IfDataOut = {
   name?: string;
   type: string;
   sources?: string[];
-  properties?: Properties[];
-  constraints?: Constraints[];
+  properties?: Property[];
+  constraints?: Constraint[];
 };
 
 export type IfNode = {
@@ -147,8 +148,8 @@ export type IfNode = {
   dataIns: IfDataIn[];
   dataOuts: DataOut[];
   ifDataOuts: IfDataOut[];
-  properties?: Properties[];
-  constraints?: Constraints[];
+  properties?: Property[];
+  constraints?: Constraint[];
   conditions: Condition[];
 };
 

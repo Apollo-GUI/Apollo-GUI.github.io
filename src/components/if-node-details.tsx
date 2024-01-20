@@ -12,6 +12,7 @@ import { useReactFlow } from "reactflow";
 import ConditionsSection from "./conditions-section";
 import { useDataVariables } from "@/lib/helpers";
 import IfDataOutSection from "./if-data-out-section";
+import FunctionPropertiesConstraints from "./function-properties-constraints";
 
 export default function IfNodeDetails({
   selectedNode,
@@ -121,6 +122,10 @@ export default function IfNodeDetails({
       <Separator className="my-4" />
       <IfDataOutSection selectedNode={selectedNode} updateNode={updateNode} />
       <ParentSection selectedNode={selectedNode} updateNode={updateNode} />
+      <FunctionPropertiesConstraints
+        selectedNode={selectedNode}
+        updateNode={updateNode}
+      />
     </BaseDetailsSheet>
   );
 }

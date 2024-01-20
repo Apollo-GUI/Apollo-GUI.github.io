@@ -6,6 +6,7 @@ import InfoButton from "./info-button";
 import DataInSection from "./data-in-section";
 import DataOutSection from "./data-out-section";
 import NodeNameInput from "./node-name-input";
+import FunctionPropertiesConstraints from "./function-properties-constraints";
 
 export default function ParallelNodeDetails({
   selectedNode,
@@ -35,6 +36,10 @@ export default function ParallelNodeDetails({
       <Separator className="my-4" />
       <DataOutSection selectedNode={selectedNode} updateNode={updateNode}/>
       
+      <FunctionPropertiesConstraints
+        selectedNode={selectedNode}
+        updateNode={updateNode}
+      />
     </BaseDetailsSheet>
   );
 }

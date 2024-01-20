@@ -8,6 +8,7 @@ import DataInSection from "./data-in-section";
 import DataOutSection from "./data-out-section";
 import NodeNameInput from "./node-name-input";
 import ParentSection from "./parent-section";
+import FunctionPropertiesConstraints from "./function-properties-constraints";
 export interface NodeDetailsProps {
   selectedNode: Node;
   updateNode: (nodeId: string, data: any) => void;
@@ -52,6 +53,10 @@ export default function FunctionNodeDetails({
       <Separator className="my-4" />
       <DataOutSection selectedNode={selectedNode} updateNode={updateNode} />
       <ParentSection selectedNode={selectedNode} updateNode={updateNode} />
+      <FunctionPropertiesConstraints
+        selectedNode={selectedNode}
+        updateNode={updateNode}
+      />
     </BaseDetailsSheet>
   );
 }

@@ -5,6 +5,7 @@ import { Separator } from "./ui/separator";
 import ConditionsSection from "./conditions-section";
 import DataInSection from "./data-in-section";
 import DataOutSection from "./data-out-section";
+import FunctionPropertiesConstraints from "./function-properties-constraints";
 
 export default function WhileNodeDetails({
   selectedNode,
@@ -22,9 +23,13 @@ export default function WhileNodeDetails({
       <Separator className="my-4" />
       <ConditionsSection selectedNode={selectedNode} updateNode={updateNode} />
       <Separator className="my-4" />
-      <DataInSection selectedNode={selectedNode} updateNode={updateNode}/>
+      <DataInSection selectedNode={selectedNode} updateNode={updateNode} />
       <Separator className="my-4" />
-      <DataOutSection selectedNode={selectedNode} updateNode={updateNode}/>
+      <DataOutSection selectedNode={selectedNode} updateNode={updateNode} />
+      <FunctionPropertiesConstraints
+        selectedNode={selectedNode}
+        updateNode={updateNode}
+      />
     </BaseDetailsSheet>
   );
 }

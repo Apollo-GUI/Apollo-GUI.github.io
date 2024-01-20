@@ -6,6 +6,7 @@ import { ApolloNodeType } from "../types";
 import ParallelNodeDetails from "@/components/parallel-node-details";
 import IfNodeDetails from "@/components/if-node-details";
 import WhileNodeDetails from "@/components/while-node-details";
+import { uuidv4 } from "./helpers";
 
 export function getDefaultData(type: ApolloNodeType) {
   switch (type) {
@@ -36,7 +37,13 @@ export function getDefaultData(type: ApolloNodeType) {
         type: "if",
         dataOuts: [],
         dataIns: [],
-        conditions: [{}],
+        conditions: [
+          {
+            id: uuidv4(),
+            combinedWith: "and",
+            type: "string",
+          },
+        ],
       };
     case "while":
       return {
@@ -44,7 +51,13 @@ export function getDefaultData(type: ApolloNodeType) {
         type: "while",
         dataOuts: [],
         dataIns: [],
-        conditions: [{}],
+        conditions: [
+          {
+            id: uuidv4(),
+            combinedWith: "and",
+            type: "string",
+          },
+        ],
       };
     default:
       return {

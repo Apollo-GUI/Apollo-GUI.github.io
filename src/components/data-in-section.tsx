@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "./ui/select";
 import { useDataVariables, uuidv4 } from "@/lib/helpers";
+import PropteriesConstraintsDialog from "./properties-constraints-dialog";
 
 export interface UpdateNodeSectionProps {
   selectedNode: Node;
@@ -53,7 +54,7 @@ export default function DataInSection({
           {parentInputs.map((input: DataIn) => (
             <div
               key={input.id}
-              className="grid gap-2 grid-cols-[3fr_2fr_40px] items-center mt-2"
+              className="grid gap-2 grid-cols-[3fr_2fr_25px_25px] items-center mt-2"
             >
               <p className="bg-slate-200 rounded px-4 mr-auto">
                 {getFullDataOutName(input.source, input.id)}
@@ -74,10 +75,25 @@ export default function DataInSection({
                   updateNode(selectedNode.id, {
                     ...selectedNode.data,
                   });
-                    updateNodeInternals(selectedNode.id);
+                  updateNodeInternals(selectedNode.id);
                 }}
               />
-              <Button type="button" variant="ghost" size="icon">
+
+              <PropteriesConstraintsDialog
+                properties={input.properties}
+                constraints={input.constraints}
+                onChange={(properties, constraints) => {
+                  const index = selectedNode.data.dataIns.findIndex(
+                    (el: any) => el.id === input.id,
+                  );
+                  selectedNode.data.dataIns[index].properties = properties;
+                  selectedNode.data.dataIns[index].constraints = constraints;
+                  updateNode(selectedNode.id, {
+                    ...selectedNode.data,
+                  });
+                }}
+              />
+              <Button type="button" variant="ghost" size="icon" className="w-8 p-0">
                 <Icons.remove
                   className="w-5 text-destructive"
                   strokeWidth={2}
@@ -100,11 +116,11 @@ export default function DataInSection({
         <>
           <Label htmlFor="staticInputs">Static inputs</Label>
 
-          <div className="grid gap-2 grid-cols-[2fr_1fr_2fr_40px] mt-2">
+          <div className="grid gap-2 grid-cols-[2fr_1fr_2fr_25px_25px] mt-2 items-center">
             {staticInputs.map((input: DataIn) => (
               <>
                 <Input
-                  key={"name"+input.id}
+                  key={"name" + input.id}
                   id="staticInputs"
                   type="text"
                   placeholder="variable name"
@@ -162,16 +178,31 @@ export default function DataInSection({
                   }}
                 />
 
+                <PropteriesConstraintsDialog
+                  properties={input.properties}
+                  constraints={input.constraints}
+                  onChange={(properties, constraints) => {
+                    const index = selectedNode.data.dataIns.findIndex(
+                      (el: any) => el.id === input.id,
+                    );
+                    selectedNode.data.dataIns[index].properties = properties;
+                    selectedNode.data.dataIns[index].constraints = constraints;
+                    updateNode(selectedNode.id, {
+                      ...selectedNode.data,
+                    });
+                  }}
+                />
+
                 <Button
                   variant="ghost"
                   size="icon"
+                  className="w-8 p-0"
                   key={"del" + input.id}
                   onClick={() => {
                     updateNode(selectedNode.id, {
                       ...selectedNode.data,
                       dataIns: selectedNode.data.dataIns.filter(
-                        (d: DataIn) =>
-                          d.id !== input.id,
+                        (d: DataIn) => d.id !== input.id,
                       ),
                     });
                     updateNodeInternals(selectedNode.id);
