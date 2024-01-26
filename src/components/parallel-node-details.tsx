@@ -32,9 +32,6 @@ export default function ParallelNodeDetails({
       </div>
       {node.iterators.length > 0 && (
         <>
-          <h1 className="text-sm font-medium leading-none mt-2">
-            Input from parents
-          </h1>
           {node.iterators.map((iterator, idx) => (
             <div
               key={`${node.iterators.length}-${idx}`}

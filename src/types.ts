@@ -12,7 +12,6 @@ export const dataTypes = [
   "boolean",
   "object",
   "array",
-  "collection",
   "null",
 ] as const;
 export type DataType = (typeof dataTypes)[number];

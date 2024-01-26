@@ -47,7 +47,7 @@ struct DataInOrOut {
 }
 
 fn skip_type_if(typ: &String) -> bool {
-    typ == "if"
+    typ != "function"
 }
 
 #[skip_serializing_none]
@@ -95,10 +95,12 @@ enum ExportedFunction {
     },
     // Switch {
     // },
+    #[serde(rename = "parallelFor")]
     ParallelFor {
         #[serde(flatten)]
         node: Node,
         iterators: Vec<String>,
+        #[serde(rename = "loopBody")]
         loop_body: Vec<ExportedFunction>,
     },
     SequentialWhile {
@@ -231,16 +233,6 @@ fn parse_sub_flow(
         match node.function.clone() {
             Function::AtomicFunction => {
                 res.push(ExportedFunction::AtomicFunction { node: new_node });
-                if let Some(funcs) = edge_map.get(node.id.as_str()) {
-                    res.extend(parse_sub_flow(
-                        funcs,
-                        node_map,
-                        edge_map,
-                        children_map,
-                        dependency_count_map,
-                        node.parent_id.clone(),
-                    ))
-                }
             }
             Function::IfThenElse {
                 condition,
@@ -367,6 +359,16 @@ fn parse_sub_flow(
             }
             Function::StartOrEnd { .. } => {}
         }
+        if let Some(funcs) = edge_map.get(node.id.as_str()) {
+            res.extend(parse_sub_flow(
+                funcs,
+                node_map,
+                edge_map,
+                children_map,
+                dependency_count_map,
+                node.parent_id.clone(),
+            ))
+        }
     }
 
     res
@@ -412,6 +414,25 @@ fn get_data_input(
                     constraints: data.constraints.clone(),
                 }
             } else {
+                let mut source_parent = source_node.clone();
+                while source_parent.parent_id.is_some()
+                    && source_parent.parent_id
+                        != node_map
+                            .get(&node_id)
+                            .map(|n| n.parent_id.clone().unwrap_or("".to_string()))
+                {
+                    source_parent = node_map
+                        .get(&source_parent.parent_id.unwrap())
+                        .expect("Parent not found")
+                        .clone();
+                }
+
+                let parent_data_out = source_parent
+                    .internal_data_outs
+                    .as_ref()
+                    .map(|d| d.iter().find(|d| *d.id == data.id))
+                    .unwrap_or(None);
+
                 let data_out = source_node
                     .internal_data_outs
                     .as_ref()
@@ -421,15 +442,26 @@ fn get_data_input(
                             .expect("output data not found")
                     })
                     .expect("no data outs found");
+
+                let data_out_name = parent_data_out
+                    .map(|p| p.rename.clone())
+                    .unwrap_or(None)
+                    .unwrap_or(
+                        data_out
+                            .rename
+                            .clone()
+                            .unwrap_or(data_out.name.clone().unwrap_or("".to_string())),
+                    );
+
                 DataInOrOut {
                     id: data.id.clone(),
-                    name: actual_name,
+                    name: if data.rename.is_some() {
+                        data.rename.clone().unwrap()
+                    } else {
+                        data_out_name.clone()
+                    },
                     typ: data_out.typ.clone().unwrap_or("string".to_string()),
-                    source: Some(
-                        source_node.name.clone()
-                            + "/"
-                            + &data_out.name.clone().unwrap_or("".to_string()),
-                    ),
+                    source: Some(source_parent.name.clone() + "/" + &data_out_name),
                     properties: data.properties.clone(),
                     constraints: data.constraints.clone(),
                 }
@@ -508,7 +540,10 @@ pub fn export_from_flow(workflow: Workflow) -> ApolloYaml {
                             })
                             .collect(),
                     },
-                    _ => panic!("unknown or unimplemented node type"),
+                    _ => panic!(
+                        "unknown or unimplemented node type: {}",
+                        node.typ.to_string()
+                    ),
                 },
             },
         );
