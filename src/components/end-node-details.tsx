@@ -29,7 +29,7 @@ export default function EndNodeDetails({
 
       { selectedNode.data.dataIns?.length ? (selectedNode.data.dataIns.map((input: DataIn, idx: number) => (
         <div key={input.id} className="grid gap-2 grid-cols-[3fr_2fr_40px] items-center mt-2">
-          <p className="bg-slate-200 rounded px-4 mr-auto">{getFullDataOutName(input.source, input.id)}</p>
+          <p className="bg-slate-200 rounded px-4 mr-auto">{getFullDataOutName(input.source, input.id, selectedNode)}</p>
 
               <Input
                 key={"rename"+idx.toString()}

@@ -49,6 +49,15 @@ struct NodeInternals {
     #[serde(rename = "ifDataOuts")]
     if_data_outs: Option<Vec<IfDataOut>>,
     conditions: Option<Vec<Condition>>,
+    iterators: Option<Vec<String>>,
+    constraints: Option<Vec<PropertyOrConstraint>>,
+    properties: Option<Vec<PropertyOrConstraint>>,
+}
+
+#[derive(Deserialize, Serialize, Clone)]
+pub struct PropertyOrConstraint {
+    name: String,
+    value: String,
 }
 
 #[derive(Deserialize, Serialize, Clone)]
@@ -83,6 +92,8 @@ pub struct InternalDataInOrOut {
     value: Option<String>,
     #[serde(rename = "type")]
     typ: Option<String>,
+    constraints: Option<Vec<PropertyOrConstraint>>,
+    properties: Option<Vec<PropertyOrConstraint>>,
 }
 
 #[derive(Deserialize)]

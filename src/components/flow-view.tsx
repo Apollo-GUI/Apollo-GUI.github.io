@@ -63,8 +63,6 @@ export default function FlowView({
 
   const onConnect = useCallback(
     (params: Connection) => {
-
-      console.log(params)
       const source = nodes.find((n) => n.id === params.source);
       const target = nodes.find((n) => n.id === params.target);
       if (

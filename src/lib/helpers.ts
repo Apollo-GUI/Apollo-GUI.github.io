@@ -1,5 +1,5 @@
 import { DataIn, DataOut, Workflow } from "@/types";
-import { useReactFlow } from "reactflow";
+import { Node, useReactFlow } from "reactflow";
 
 export const WORKFLOW_KEY_PREFIX = "wf_";
 
@@ -58,11 +58,20 @@ export function useDataVariables() {
 
       const nodeOutBase =
         node?.type === "if" ? node?.data.ifDataOuts : node?.data.dataOuts;
+      const inputBase = nodeOutBase?.find((e: DataOut) => e.id === input.id);
+      let parent = node?.parentNode ? node : undefined;
+      while (parent?.parentNode !== undefined) {
+        parent = getNode(parent?.parentNode);
+      }
       return input.source === nodeId
         ? input.name
-        : nodeOutBase?.find((e: DataOut) => e.id === input.id)?.name;
+        : parent?.data.dataOuts.find((e: DataOut) => e.id == input.id)
+            ?.rename ??
+            inputBase?.rename ??
+            inputBase.name;
     },
     getDataOutName: (output: DataOut) => {
+      if (output.rename) return output.rename;
       if (output.source === undefined) return output.name;
       const node = getNode(output.source);
 
@@ -71,9 +80,18 @@ export function useDataVariables() {
 
       return nodeOutBase?.find((e: DataIn) => e.id === output.id)?.name;
     },
-    getFullDataOutName: (nodeId: string, dataId: string) => {
+    getFullDataOutName: (
+      nodeId: string,
+      dataId: string,
+      currentNode?: Node,
+    ) => {
       const node = getNode(nodeId);
-      let parent = node?.parentNode ? node : undefined;
+      let parent =
+        node?.parentNode &&
+        currentNode?.parentNode !== node.parentNode &&
+        node.parentNode !== currentNode?.id
+          ? node
+          : undefined;
       while (parent?.parentNode !== undefined) {
         parent = getNode(parent?.parentNode);
       }
@@ -85,7 +103,8 @@ export function useDataVariables() {
           ? parent?.data.name
           : node?.data.name) +
         "/" +
-        nodeOutBase?.find((e: DataOut) => e.id === dataId)?.name
+        (parent?.data.dataOuts.find((e: DataOut) => e.id == dataId)?.rename ??
+          nodeOutBase?.find((e: DataOut) => e.id === dataId)?.name)
       );
     },
     getTypeRec: (nodeId: string, dataId: string) => {

@@ -36,7 +36,7 @@ export default function DataOutSection({
         />
       </div>
       {selectedNode.data.dataOuts?.length > 0 && (
-        <div className="grid grid-cols-[3fr_1fr_25px_25px] items-center gap-2 mt-4">
+        <div className="grid grid-cols-[2fr_1fr_25px_25px] items-center gap-2 mt-4">
           <Label>Name</Label>
           <Label>Type</Label>
           <div />
@@ -45,14 +45,40 @@ export default function DataOutSection({
             <>
               {output.source !== undefined ? (
                 getNode(output.source)?.parentNode === selectedNode.id ? (
-                  <div
-                    key={idx.toString()}
-                    className="flex items-center justify-between col-span-2"
-                  >
-                    <p className="bg-slate-200 rounded px-4">
-                      {getFullDataOutName(output.source, output.id)}
-                    </p>
-                  </div>
+                  <>
+                    <div
+                      key={idx.toString()}
+                      className="flex items-center justify-between"
+                    >
+                      <p className="bg-slate-200 rounded px-4">
+                        {getFullDataOutName(
+                          output.source,
+                          output.id,
+                          selectedNode,
+                        )}
+                      </p>
+                    </div>
+
+                    <Input
+                      key={"rename" + output.id}
+                      id="rename"
+                      type="text"
+                      placeholder="(optinal rename)"
+                      className="max-w-[200px]"
+                      value={output.rename}
+                      onChange={(e) => {
+                        const index = selectedNode.data.dataOuts.findIndex(
+                          (el: any) => el.id === output.id,
+                        );
+                        selectedNode.data.dataOuts[index].rename =
+                          e.target.value;
+                        updateNode(selectedNode.id, {
+                          ...selectedNode.data,
+                        });
+                        updateNodeInternals(selectedNode.id);
+                      }}
+                    />
+                  </>
                 ) : (
                   <Select
                     value={output.id}
@@ -76,7 +102,11 @@ export default function DataOutSection({
                         (input: DataIn, i: number) => (
                           <SelectItem key={i.toString()} value={input.id}>
                             {input.source !== selectedNode.id
-                              ? getFullDataOutName(input.source, input.id)
+                              ? getFullDataOutName(
+                                  input.source,
+                                  input.id,
+                                  selectedNode,
+                                )
                               : input.name}
                           </SelectItem>
                         ),

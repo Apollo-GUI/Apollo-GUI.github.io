@@ -52,7 +52,7 @@ export default function IfNodeDetails({
           <>
             <p className="bg-slate-200 rounded px-4 justify-self-start">
               {input.source
-                ? getFullDataOutName(input.source, input.id)
+                ? getFullDataOutName(input.source, input.id, selectedNode)
                 : input.name}
             </p>
             <Checkbox
@@ -70,7 +70,7 @@ export default function IfNodeDetails({
                     if (c === true) {
                       updateNode(e.target, {
                         ...connectedNode.data,
-                        dataIns: [...connectedNode.data.dataIns, {...input}],
+                        dataIns: [...connectedNode.data.dataIns, { ...input }],
                       });
                     } else {
                       updateNode(e.target, {
@@ -101,7 +101,7 @@ export default function IfNodeDetails({
                     if (c === true) {
                       updateNode(e.target, {
                         ...connectedNode.data,
-                        dataIns: [...connectedNode.data.dataIns, {...input}],
+                        dataIns: [...connectedNode.data.dataIns, { ...input }],
                       });
                     } else {
                       updateNode(e.target, {

@@ -146,7 +146,11 @@ function IfInternalVariableSelector({
                         key={option.name}
                         className="rounded-sm px-1 font-normal"
                       >
-                        {getFullDataOutName(option.source ?? "", option.id)}
+                        {getFullDataOutName(
+                          option.source ?? "",
+                          option.id,
+                          selectedNode,
+                        )}
                       </Badge>
                     ))
                 )}
@@ -210,7 +214,11 @@ function IfInternalVariableSelector({
                     <Icons.check className={cn("h-4 w-4")} />
                   </div>
                   <span>
-                    {getFullDataOutName(option.source ?? "", option.id)}
+                    {getFullDataOutName(
+                      option.source ?? "",
+                      option.id,
+                      selectedNode,
+                    )}
                   </span>
                 </div>
               );

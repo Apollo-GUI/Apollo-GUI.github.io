@@ -57,7 +57,7 @@ export default function DataInSection({
               className="grid gap-2 grid-cols-[3fr_2fr_25px_25px] items-center mt-2"
             >
               <p className="bg-slate-200 rounded px-4 mr-auto">
-                {getFullDataOutName(input.source, input.id)}
+                {getFullDataOutName(input.source, input.id, selectedNode)}
               </p>
 
               <Input

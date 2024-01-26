@@ -12,6 +12,7 @@ export const dataTypes = [
   "boolean",
   "object",
   "array",
+  "collection",
   "null",
 ] as const;
 export type DataType = (typeof dataTypes)[number];
@@ -45,6 +46,7 @@ export type DataOut = {
   name?: string;
   type?: DataType;
   source?: string;
+  rename?: string;
   startSource?: string;
   properties?: Property[];
   constraints?: Constraint[];
@@ -85,12 +87,6 @@ export type Constraint = {
   value: string;
 };
 
-export type Iterator = {
-  dataIns: DataIn[];
-  isDataIn: boolean;
-  value: number;
-};
-
 export type FunctionNode = {
   name: string;
   type: string;
@@ -117,7 +113,7 @@ export type ParallelNode = {
   dataOuts: DataOut[];
   properties?: Property[];
   constraints?: Constraint[];
-  iterator: Iterator;
+  iterators: string[];
 };
 
 export type WhileNode = {

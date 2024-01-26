@@ -30,6 +30,7 @@ export function getDefaultData(type: ApolloNodeType) {
         type: "parallel",
         dataOuts: [],
         dataIns: [],
+        iterators: [""],
       };
     case "if":
       return {

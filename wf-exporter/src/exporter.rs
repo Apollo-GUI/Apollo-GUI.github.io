@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
-use crate::{IfDataOut, InternalDataInOrOut, Workflow};
+use crate::{IfDataOut, InternalDataInOrOut, PropertyOrConstraint, Workflow};
 
 #[skip_serializing_none]
 #[derive(Serialize, Deserialize, Clone)]
@@ -29,8 +29,8 @@ struct SubFC {
     data_ins: Vec<DataInOrOut>,
     data_outs: Vec<DataInOrOut>,
     workflow_body: Vec<Function>,
-    properties: Vec<PropertiesConstraintsDef>,
-    constraints: Vec<PropertiesConstraintsDef>,
+    properties: Vec<PropertyOrConstraint>,
+    constraints: Vec<PropertyOrConstraint>,
 }
 
 #[skip_serializing_none]
@@ -42,8 +42,8 @@ struct DataInOrOut {
     #[serde(rename = "type")]
     typ: String,
     source: Option<String>,
-    properties: Option<Vec<PropertiesConstraintsDef>>,
-    constraints: Option<Vec<PropertiesConstraintsDef>>,
+    properties: Option<Vec<PropertyOrConstraint>>,
+    constraints: Option<Vec<PropertyOrConstraint>>,
 }
 
 fn skip_type_if(typ: &String) -> bool {
@@ -55,6 +55,8 @@ fn skip_type_if(typ: &String) -> bool {
 struct Node {
     #[serde(skip)]
     id: String,
+    #[serde(skip)]
+    parent_id: Option<String>,
 
     #[serde(skip)]
     internal_data_ins: Option<Vec<InternalDataInOrOut>>,
@@ -68,8 +70,8 @@ struct Node {
     data_ins: Option<Vec<DataInOrOut>>,
     #[serde(rename = "dataOuts")]
     data_outs: Option<Vec<DataInOrOut>>,
-    properties: Option<Vec<PropertiesConstraintsDef>>,
-    constraints: Option<Vec<PropertiesConstraintsDef>>,
+    properties: Option<Vec<PropertyOrConstraint>>,
+    constraints: Option<Vec<PropertyOrConstraint>>,
     #[serde(skip_serializing)]
     function: Function,
 }
@@ -149,8 +151,8 @@ struct DataLoop {
     init_source: String,
     loop_source: String,
     value: String,
-    properties: Vec<PropertiesConstraintsDef>,
-    constraints: Vec<PropertiesConstraintsDef>,
+    properties: Vec<PropertyOrConstraint>,
+    constraints: Vec<PropertyOrConstraint>,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -195,23 +197,18 @@ enum ConditionOperator {
     EndsWith,
 }
 
-#[derive(Serialize, Deserialize, Clone)]
-struct PropertiesConstraintsDef {
-    name: String,
-    value: String,
-}
-
 fn parse_sub_flow(
     nodes: &Vec<&Node>,
     node_map: &HashMap<String, Node>,
     edge_map: &HashMap<String, Vec<&Node>>,
     children_map: &HashMap<String, Vec<Node>>,
     dependency_count_map: &mut HashMap<String, usize>,
+    calling_parent: Option<String>,
 ) -> Vec<ExportedFunction> {
     let mut res = Vec::new();
     for node in nodes {
         if let Some(count) = dependency_count_map.get_mut(&node.id) {
-            if *count > 0 {
+            if *count > 0 || node.parent_id != calling_parent {
                 continue;
             } else {
                 *count += 1;
@@ -241,6 +238,7 @@ fn parse_sub_flow(
                         edge_map,
                         children_map,
                         dependency_count_map,
+                        node.parent_id.clone(),
                     ))
                 }
             }
@@ -259,6 +257,7 @@ fn parse_sub_flow(
                         edge_map,
                         children_map,
                         dependency_count_map,
+                        node.parent_id.clone(),
                     ));
                 }
 
@@ -269,6 +268,7 @@ fn parse_sub_flow(
                         edge_map,
                         children_map,
                         dependency_count_map,
+                        node.parent_id.clone(),
                     ));
                 }
                 res.push(ExportedFunction::IfThenElse {
@@ -322,6 +322,7 @@ fn parse_sub_flow(
                             edge_map,
                             children_map,
                             dependency_count_map,
+                            node.parent_id.clone(),
                         ),
                         iterators,
                     })
@@ -337,6 +338,7 @@ fn parse_sub_flow(
                             edge_map,
                             children_map,
                             dependency_count_map,
+                            node.parent_id.clone(),
                         ),
                         condition,
                     })
@@ -356,6 +358,7 @@ fn parse_sub_flow(
                             edge_map,
                             children_map,
                             dependency_count_map,
+                            node.parent_id.clone(),
                         ),
                         data_loops,
                         loop_counter,
@@ -386,8 +389,8 @@ fn get_data_input(
                 name: actual_name,
                 typ: data.typ.clone().unwrap_or("".into()),
                 source: data.value.clone(),
-                properties: None,
-                constraints: None,
+                properties: data.properties.clone(),
+                constraints: data.constraints.clone(),
             }
         } else {
             let source_node = node_map.get(source).expect("source node not found");
@@ -405,8 +408,8 @@ fn get_data_input(
                     name: actual_name,
                     typ: data_out.typ.clone(),
                     source: Some(source_node.name.clone() + "/" + &data_out.name.clone()),
-                    properties: None,
-                    constraints: None,
+                    properties: data.properties.clone(),
+                    constraints: data.constraints.clone(),
                 }
             } else {
                 let data_out = source_node
@@ -427,8 +430,8 @@ fn get_data_input(
                             + "/"
                             + &data_out.name.clone().unwrap_or("".to_string()),
                     ),
-                    properties: None,
-                    constraints: None,
+                    properties: data.properties.clone(),
+                    constraints: data.constraints.clone(),
                 }
             }
         }
@@ -438,8 +441,8 @@ fn get_data_input(
             name: actual_name,
             typ: data.typ.clone().unwrap_or("".into()),
             source: data.start_source.clone(),
-            properties: None,
-            constraints: None,
+            properties: data.properties.clone(),
+            constraints: data.constraints.clone(),
         }
     }
 }
@@ -456,14 +459,15 @@ pub fn export_from_flow(workflow: Workflow) -> ApolloYaml {
             node.id.to_string(),
             Node {
                 id: node.id.to_string(),
+                parent_id: node.parent_node.clone(),
                 name: node.data.name.clone(),
                 typ: node.data.function_type.clone(),
                 data_ins: None,
                 data_outs: None,
                 internal_data_ins: node.data.data_ins.clone(),
                 internal_data_outs: node.data.data_outs.clone(),
-                properties: None,
-                constraints: None,
+                properties: node.data.properties.clone(),
+                constraints: node.data.constraints.clone(),
                 function: match node.typ.as_str() {
                     "function" => Function::AtomicFunction,
                     "start" => Function::StartOrEnd,
@@ -485,8 +489,25 @@ pub fn export_from_flow(workflow: Workflow) -> ApolloYaml {
                             .collect(),
                         if_data_outs: node.data.if_data_outs,
                     },
-                    "parallel_for" => Function::ParallelFor { iterators: vec![] },
-                    "sequential_while" => Function::SequentialWhile { condition: vec![] },
+                    "parallel" => Function::ParallelFor {
+                        iterators: node.data.iterators.clone().unwrap_or(vec![]),
+                    },
+                    "while" => Function::SequentialWhile {
+                        condition: node
+                            .data
+                            .conditions
+                            .unwrap_or(vec![])
+                            .iter()
+                            .map(|c| Condition {
+                                data1: c.data1.clone(),
+                                data2: c.data2.clone(),
+                                typ: c.typ.clone().unwrap_or("string".to_string()),
+                                operator: c.operator.clone(),
+                                negation: c.negation.clone().unwrap_or("false".to_string()),
+                                combined_with: c.combined_with.clone().unwrap_or("or".to_string()),
+                            })
+                            .collect(),
+                    },
                     _ => panic!("unknown or unimplemented node type"),
                 },
             },
@@ -545,6 +566,7 @@ pub fn export_from_flow(workflow: Workflow) -> ApolloYaml {
             &edge_map,
             &children_map,
             &mut dependency_count_map,
+            None,
         ),
         data_outs: end_node.internal_data_ins.as_ref().map(|d| {
             d.iter()
