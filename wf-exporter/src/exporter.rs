@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
-use crate::{IfDataOut, InternalDataInOrOut, PropertyOrConstraint, Workflow};
+use crate::{IfDataOut, InternalDataInOrOut, InternalIterator, PropertyOrConstraint, Workflow};
 
 #[skip_serializing_none]
 #[derive(Serialize, Deserialize, Clone)]
@@ -47,7 +47,7 @@ struct DataInOrOut {
 }
 
 fn skip_type_if(typ: &String) -> bool {
-    typ != "function"
+    typ == "if" || typ == "parallel" || typ == "while"
 }
 
 #[skip_serializing_none]
@@ -134,6 +134,7 @@ enum Function {
     // },
     ParallelFor {
         iterators: Vec<String>,
+        internal_iterators: Vec<InternalIterator>,
     },
     SequentialWhile {
         condition: Vec<Condition>,
@@ -396,6 +397,60 @@ fn get_data_input(
             }
         } else {
             let source_node = node_map.get(source).expect("source node not found");
+            let current_node = node_map.get(&node_id).expect("current node not found");
+
+            if let Some(Node {
+                name,
+                internal_data_ins,
+                function:
+                    Function::ParallelFor {
+                        iterators,
+                        internal_iterators,
+                        ..
+                    },
+                ..
+            }) = current_node
+                .parent_id
+                .clone()
+                .map(|c| node_map.get(&c).expect("parent not found"))
+            {
+                if let Some(Some(parent_input)) = internal_data_ins
+                    .as_ref()
+                    .map(|i| i.iter().find(|di| di.id == data.id))
+                {
+                    let parent_in_name = parent_input
+                        .rename
+                        .clone()
+                        .unwrap_or(parent_input.name.clone().unwrap_or("".to_string()));
+
+                    let data_in_type = if iterators.contains(&parent_in_name) {
+                        let iterator = internal_iterators
+                            .iter()
+                            .find(|i| i.name == Some(parent_in_name.clone()))
+                            .unwrap();
+                        iterator.elemnt_type.clone().unwrap_or("string".to_string())
+                    } else {
+                        "string".to_string()
+                    };
+
+                    return DataInOrOut {
+                        id: data.id.clone(),
+                        name: actual_name,
+                        typ: data_in_type,
+                        source: Some(
+                            name.to_string()
+                                + "/"
+                                + &parent_input
+                                    .clone()
+                                    .rename
+                                    .unwrap_or(parent_input.name.clone().unwrap_or("".to_string())),
+                        ),
+                        properties: data.properties.clone(),
+                        constraints: data.constraints.clone(),
+                    };
+                }
+            }
+
             if let Function::IfThenElse { if_data_outs, .. } = &source_node.function {
                 let data_out = if_data_outs
                     .as_ref()
@@ -416,10 +471,8 @@ fn get_data_input(
             } else {
                 let mut source_parent = source_node.clone();
                 while source_parent.parent_id.is_some()
-                    && source_parent.parent_id
-                        != node_map
-                            .get(&node_id)
-                            .map(|n| n.parent_id.clone().unwrap_or("".to_string()))
+                    && source_parent.clone().parent_id.unwrap() != node_id
+                    && source_parent.parent_id != current_node.parent_id
                 {
                     source_parent = node_map
                         .get(&source_parent.parent_id.unwrap())
@@ -453,14 +506,37 @@ fn get_data_input(
                             .unwrap_or(data_out.name.clone().unwrap_or("".to_string())),
                     );
 
+                let correct_name = if data.rename.is_some() {
+                    data.rename.clone().unwrap()
+                } else {
+                    data_out_name.clone()
+                };
+
+                let data_type = if let Function::ParallelFor { .. } = source_parent.function {
+                    "array".to_string()
+                } else {
+                    if let Function::ParallelFor {
+                        iterators,
+                        internal_iterators,
+                    } = &current_node.function
+                    {
+                        if iterators.contains(&correct_name) {
+                            let iterator = internal_iterators
+                                .iter()
+                                .find(|i| i.name == Some(correct_name.clone()))
+                                .unwrap();
+                            iterator.elemnt_type.clone().unwrap_or("string".to_string())
+                        } else {
+                            "array".to_string()
+                        }
+                    } else {
+                        data_out.typ.clone().unwrap_or("string".to_string())
+                    }
+                };
                 DataInOrOut {
                     id: data.id.clone(),
-                    name: if data.rename.is_some() {
-                        data.rename.clone().unwrap()
-                    } else {
-                        data_out_name.clone()
-                    },
-                    typ: data_out.typ.clone().unwrap_or("string".to_string()),
+                    name: correct_name,
+                    typ: data_type,
                     source: Some(source_parent.name.clone() + "/" + &data_out_name),
                     properties: data.properties.clone(),
                     constraints: data.constraints.clone(),
@@ -522,7 +598,17 @@ pub fn export_from_flow(workflow: Workflow) -> ApolloYaml {
                         if_data_outs: node.data.if_data_outs,
                     },
                     "parallel" => Function::ParallelFor {
-                        iterators: node.data.iterators.clone().unwrap_or(vec![]),
+                        iterators: node
+                            .data
+                            .iterators
+                            .clone()
+                            .map(|o| {
+                                o.iter()
+                                    .map(|i| i.name.clone().unwrap_or("".to_string()))
+                                    .collect()
+                            })
+                            .unwrap_or(vec![]),
+                        internal_iterators: node.data.iterators.unwrap_or(vec![]),
                     },
                     "while" => Function::SequentialWhile {
                         condition: node

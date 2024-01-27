@@ -7,9 +7,18 @@ import DataInSection from "./data-in-section";
 import DataOutSection from "./data-out-section";
 import NodeNameInput from "./node-name-input";
 import FunctionPropertiesConstraints from "./function-properties-constraints";
-import { ParallelNode } from "@/types";
+import { ParallelNode, dataTypes } from "@/types";
 import { Button } from "./ui/button";
 import { Icons } from "./icons";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
+import { Label } from "./ui/label";
+import { uuidv4 } from "@/lib/helpers";
 
 export default function ParallelNodeDetails({
   selectedNode,
@@ -32,45 +41,77 @@ export default function ParallelNodeDetails({
       </div>
       {node.iterators.length > 0 && (
         <>
-          {node.iterators.map((iterator, idx) => (
-            <div
-              key={`${node.iterators.length}-${idx}`}
-              className="grid gap-2 grid-cols-[1fr_25px] items-center mt-2"
-            >
-              <Input
-                id="iterator"
-                type="text"
-                placeholder="iterator variable/value"
-                value={iterator}
-                onChange={(e) => {
-                  node.iterators[idx] = e.target.value;
-                  updateNode(selectedNode.id, {
-                    ...selectedNode.data,
-                  });
-                }}
-              />
-
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="w-8 p-0"
-              >
-                <Icons.remove
-                  className="w-5 text-destructive"
-                  strokeWidth={2}
-                  onClick={() => {
+          <div className="grid gap-2 grid-cols-[2fr_1fr_25px] items-center mt-2">
+            <Label>Iterator</Label>
+            <Label>Element Type</Label>
+            <div />
+            {node.iterators.map((iterator) => (
+              <>
+                <Input
+                  key={iterator.id}
+                  id="iterator"
+                  type="text"
+                  placeholder="iterator variable/value"
+                  value={iterator.name}
+                  onChange={(e) => {
+                    const index = node.iterators.findIndex(
+                      (el: any) => el.id === iterator.id,
+                    );
+                    node.iterators[index].name = e.target.value;
                     updateNode(selectedNode.id, {
                       ...selectedNode.data,
-                      iterators: node.iterators.filter(
-                        (_: string, i) => i !== idx,
-                      ),
                     });
                   }}
                 />
-              </Button>
-            </div>
-          ))}
+
+                <Select
+                  value={iterator.elementType}
+                  key={"type" + iterator.id}
+                  onValueChange={(e) => {
+                    const index = node.iterators.findIndex(
+                      (el: any) => el.id === iterator.id,
+                    );
+                    node.iterators[index].elementType = e;
+                    updateNode(selectedNode.id, {
+                      ...selectedNode.data,
+                    });
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {dataTypes
+                      .filter((t) => t != "array" && t != "null")
+                      .map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {type}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="w-8 p-0"
+                >
+                  <Icons.remove
+                    className="w-5 text-destructive"
+                    strokeWidth={2}
+                    onClick={() => {
+                      updateNode(selectedNode.id, {
+                        ...selectedNode.data,
+                        iterators: node.iterators.filter(
+                          (it) => it.id !== iterator.id,
+                        ),
+                      });
+                    }}
+                  />
+                </Button>
+              </>
+            ))}
+          </div>
         </>
       )}
 
@@ -81,7 +122,10 @@ export default function ParallelNodeDetails({
         onClick={() => {
           updateNode(selectedNode.id, {
             ...selectedNode.data,
-            iterators: [...(selectedNode.data.iterators ?? []), ""],
+            iterators: [
+              ...(selectedNode.data.iterators ?? []),
+              { id: uuidv4() },
+            ],
           });
         }}
       >

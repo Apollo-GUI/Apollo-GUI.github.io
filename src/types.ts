@@ -106,13 +106,19 @@ export type EndNode = {
   dataIns: DataIn[];
 };
 
+export type Iterator = {
+  id: string;
+  name: string;
+  elementType: string;
+}
+
 export type ParallelNode = {
   name: string;
   dataIns: DataIn[];
   dataOuts: DataOut[];
   properties?: Property[];
   constraints?: Constraint[];
-  iterators: string[];
+  iterators: Iterator[];
 };
 
 export type WhileNode = {

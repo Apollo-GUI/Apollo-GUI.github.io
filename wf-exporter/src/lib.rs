@@ -36,6 +36,14 @@ struct EditorNode {
     data: NodeInternals,
 }
 
+#[derive(Deserialize, Serialize, Clone)]
+pub struct InternalIterator {
+    id: String,
+    #[serde(rename = "elementType")]
+    elemnt_type: Option<String>,
+    name: Option<String>,
+}
+
 #[derive(Deserialize)]
 struct NodeInternals {
     name: String,
@@ -49,7 +57,7 @@ struct NodeInternals {
     #[serde(rename = "ifDataOuts")]
     if_data_outs: Option<Vec<IfDataOut>>,
     conditions: Option<Vec<Condition>>,
-    iterators: Option<Vec<String>>,
+    iterators: Option<Vec<InternalIterator>>,
     constraints: Option<Vec<PropertyOrConstraint>>,
     properties: Option<Vec<PropertyOrConstraint>>,
 }
