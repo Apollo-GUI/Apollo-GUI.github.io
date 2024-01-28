@@ -111,7 +111,7 @@ export default function Home({ selectWorkflow }: HomeProps) {
           <AlertTitle>Heads up!</AlertTitle>
           <AlertDescription>
             This project is still in active development and may still have
-            issus. If you find anything please open an issue in the{" "}
+            issues. If you find anything please open an issue in the{" "}
             <a
               href="https://github.com/Apollo-GUI/Apollo-GUI.github.io"
               target="_blank"
