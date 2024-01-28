@@ -74,8 +74,6 @@ export default function WorkflowActions({
           >
             Make a copy
           </DropdownMenuItem>
-          <DropdownMenuItem>Export Apollo Yaml</DropdownMenuItem>
-          <DropdownMenuItem>Download Graph</DropdownMenuItem>
 
           <DropdownMenuSeparator />
           <AlertDialogTrigger asChild>

@@ -466,9 +466,10 @@ fn get_data_input(
                         {
                             let iterator = internal_iterators
                                 .iter()
-                                .find(|i| i.name == Some(parent_in_name.clone()))
-                                .unwrap();
-                            iterator.elemnt_type.clone().unwrap_or("string".to_string())
+                                .find(|i| i.name == Some(parent_in_name.clone()));
+                            iterator
+                                .map(|i| i.elemnt_type.clone().unwrap_or("string".to_string()))
+                                .unwrap_or("string".to_string())
                         } else {
                             "string".to_string()
                         };
