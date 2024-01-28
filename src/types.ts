@@ -112,13 +112,21 @@ export type Iterator = {
   elementType: string;
 }
 
+export type LoopCounter = {
+  enabled: boolean;
+  to: string;
+  type: string;
+  step: string;
+}
+
 export type ParallelNode = {
   name: string;
   dataIns: DataIn[];
   dataOuts: DataOut[];
   properties?: Property[];
   constraints?: Constraint[];
-  iterators: Iterator[];
+  iterators?: Iterator[];
+  loopCounter?: LoopCounter;
 };
 
 export type WhileNode = {

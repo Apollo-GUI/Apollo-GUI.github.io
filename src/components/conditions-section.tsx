@@ -206,9 +206,11 @@ export default function ConditionsSection({
         <DropdownMenuContent>
           <DropdownMenuItem
             onSelect={() => {
-              selectedNode.data.conditions[
-                selectedNode.data.conditions.length - 1
-              ].combinedWith = "and";
+              const prevCondIndex = selectedNode.data.conditions.length - 1;
+              if (prevCondIndex >= 0) {
+                selectedNode.data.conditions[prevCondIndex].combinedWith =
+                  "and";
+              }
               selectedNode.data.conditions.push({
                 id: uuidv4(),
                 combinedWith: "and",
@@ -224,9 +226,10 @@ export default function ConditionsSection({
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() => {
-              selectedNode.data.conditions[
-                selectedNode.data.conditions.length - 1
-              ].combinedWith = "or";
+              const prevCondIndex = selectedNode.data.conditions.length - 1;
+              if (prevCondIndex >= 0) {
+                selectedNode.data.conditions[prevCondIndex].combinedWith = "or";
+              }
               selectedNode.data.conditions.push({
                 id: uuidv4(),
                 combinedWith: "or",

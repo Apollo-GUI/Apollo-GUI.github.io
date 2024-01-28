@@ -35,6 +35,14 @@ struct EditorNode {
     parent_node: Option<String>,
     data: NodeInternals,
 }
+#[derive(Deserialize, Serialize, Clone)]
+pub struct InternalLoopCounter {
+    enabled: bool,
+    to: Option<String>,
+    #[serde(rename = "type")]
+    typ: String,
+    step: Option<String>,
+}
 
 #[derive(Deserialize, Serialize, Clone)]
 pub struct InternalIterator {
@@ -58,6 +66,8 @@ struct NodeInternals {
     if_data_outs: Option<Vec<IfDataOut>>,
     conditions: Option<Vec<Condition>>,
     iterators: Option<Vec<InternalIterator>>,
+    #[serde(rename = "loopCounter")]
+    loop_counter: Option<InternalLoopCounter>,
     constraints: Option<Vec<PropertyOrConstraint>>,
     properties: Option<Vec<PropertyOrConstraint>>,
 }
@@ -84,7 +94,7 @@ pub struct Condition {
     #[serde(rename = "type")]
     typ: Option<String>,
     operator: String,
-    negation: Option<String>,
+    negation: Option<bool>,
     #[serde(rename = "combinedWith")]
     combined_with: Option<String>,
 }
@@ -122,7 +132,9 @@ pub fn convert_to_wf_yaml(wf: JsValue) -> String {
         Ok(wf) => wf,
         Err(e) => {
             log(&e.to_string());
-            alert("Error! Could not parse workflow.");
+            alert(
+                "Error! Could not parse workflow. Please check the console for more information.",
+            );
             return String::from("");
         }
     };

@@ -22,8 +22,12 @@ import logo from "./apollo_logo.png";
 import { Workflow } from "./types";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "./components/ui/alert";
+import { Separator } from "./components/ui/separator";
 
-const exapmleWorkflows = import.meta.glob("../example-wfs/*.json", {
+const exapmleWorkflows = import.meta.glob("../example-wfs/demos/*.json", {
+  eager: true,
+});
+const complexWorkflows = import.meta.glob("../example-wfs/complex/*.json", {
   eager: true,
 });
 
@@ -267,11 +271,26 @@ export default function Home({ selectWorkflow }: HomeProps) {
                   </TableBody>
                 </Table>
               </div>
-              <h1 className="text-2xl font-bold pt-6 pb-4">
+              <h1 className="text-2xl font-bold pt-6 pb-2">
                 Example Workflows
               </h1>
-              <div className="flex gap-2">
+              <h6 className="text-slate-600 pb-2">Simple Demos</h6>
+              <div className="flex gap-2 flex-wrap">
                 {Object.values(exapmleWorkflows)
+                  .map((workflow: any, idx) => (
+                    <Button
+                      key={idx}
+                      variant={"outline"}
+                      onClick={() => selectWorkflow(workflow)}
+                    >
+                      {workflow.name}
+                    </Button>
+                  ))}
+              </div>
+              <Separator className="mt-4 mb-2"/>
+              <h6 className="text-slate-600">Examples from<Button variant={"link"} className="pl-2" asChild><a href="https://github.com/Apollo-Workflows" target="_blank">Apollo-Workflows</a></Button></h6>
+              <div className="flex gap-2 flex-wrap">
+                {Object.values(complexWorkflows)
                   .map((workflow: any, idx) => (
                     <Button
                       key={idx}

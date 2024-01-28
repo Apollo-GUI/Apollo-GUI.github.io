@@ -2,7 +2,12 @@ import { convert_to_wf_yaml } from "../../wf-exporter/pkg";
 
 export function exportApolloYaml(workflow: { name: string; data: any }) {
   console.log(workflow);
-  const result = convert_to_wf_yaml(workflow);
+  let result = "";
+  try {
+    result = convert_to_wf_yaml(workflow);
+  } catch (e) {
+    alert("Could not export workflow. Check console for more detailed error.");
+  }
 
   if (result.length == 0) return;
 
@@ -18,7 +23,6 @@ export function exportApolloYaml(workflow: { name: string; data: any }) {
   a.click();
   window.URL.revokeObjectURL(url);
 }
-
 
 export function downloadGraph(workflow: { name: string; data: any }) {
   const result = JSON.stringify(workflow);

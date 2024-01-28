@@ -63,12 +63,22 @@ export function useDataVariables() {
       while (parent?.parentNode !== undefined) {
         parent = getNode(parent?.parentNode);
       }
+
+      const isCompund =
+        node?.type === "if" ||
+        node?.type === "while" ||
+        node?.type === "parallel";
+
+      const dataInPossibility = isCompund
+        ? node?.data.dataIns.find((e: DataIn) => e.id == input.id)
+        : parent?.data.dataOuts.find((e: DataOut) => e.id == input.id);
+
       return input.source === nodeId
         ? input.name
-        : parent?.data.dataOuts.find((e: DataOut) => e.id == input.id)
-            ?.rename ??
+        : dataInPossibility?.rename ??
+            dataInPossibility?.name ??
             inputBase?.rename ??
-            inputBase.name;
+            inputBase?.name;
     },
     getDataOutName: (output: DataOut) => {
       if (output.rename) return output.rename;

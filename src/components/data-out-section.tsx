@@ -1,4 +1,4 @@
-import { DataIn, DataOut, dataTypes } from "@/types";
+import { DataOut, dataTypes } from "@/types";
 import InfoButton from "./info-button";
 import { Button } from "./ui/button";
 import { Icons } from "./icons";
@@ -13,7 +13,7 @@ import {
 } from "./ui/select";
 import { UpdateNodeSectionProps } from "./data-in-section";
 import { useDataVariables, uuidv4 } from "@/lib/helpers";
-import { useReactFlow, useUpdateNodeInternals } from "reactflow";
+import { useUpdateNodeInternals } from "reactflow";
 import PropteriesConstraintsDialog from "./properties-constraints-dialog";
 
 export default function DataOutSection({
@@ -22,7 +22,6 @@ export default function DataOutSection({
 }: UpdateNodeSectionProps) {
   const { getFullDataOutName } = useDataVariables();
   const updateNodeInternals = useUpdateNodeInternals();
-  const { getNode } = useReactFlow();
   return (
     <>
       <div className="flex items-center">
@@ -44,7 +43,6 @@ export default function DataOutSection({
           {selectedNode.data.dataOuts.map((output: DataOut, idx: number) => (
             <>
               {output.source !== undefined ? (
-                getNode(output.source)?.parentNode === selectedNode.id ? (
                   <>
                     <div
                       key={idx.toString()}
@@ -79,41 +77,6 @@ export default function DataOutSection({
                       }}
                     />
                   </>
-                ) : (
-                  <Select
-                    value={output.id}
-                    key={"source" + idx}
-                    onValueChange={(e) => {
-                      selectedNode.data.dataOuts[idx] =
-                        selectedNode.data.dataIns.find(
-                          (i: DataIn) => i.id === e,
-                        );
-                      updateNode(selectedNode.id, {
-                        ...selectedNode.data,
-                      });
-                      updateNodeInternals(selectedNode.id);
-                    }}
-                  >
-                    <SelectTrigger className="col-span-2">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {selectedNode.data.dataIns.map(
-                        (input: DataIn, i: number) => (
-                          <SelectItem key={i.toString()} value={input.id}>
-                            {input.source !== selectedNode.id
-                              ? getFullDataOutName(
-                                  input.source,
-                                  input.id,
-                                  selectedNode,
-                                )
-                              : input.name}
-                          </SelectItem>
-                        ),
-                      )}
-                    </SelectContent>
-                  </Select>
-                )
               ) : (
                 <>
                   <Input

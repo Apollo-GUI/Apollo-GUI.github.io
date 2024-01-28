@@ -77,16 +77,21 @@ export default function FlowView({
       if (source && target && !isNaN(inputIndex)) {
         let input: DataIn | DataOut;
 
-        let isCompound =
+        const isCompound =
           source.type === "parallel" ||
           source.type === "while" ||
           source.type === "if";
+
+        const isTargetCompound =
+          target.type === "parallel" ||
+          target.type === "while" ||
+          target.type === "if";
 
         if (source.type === "if" && params.sourceHandle?.startsWith("o")) {
           input = source.data.ifDataOuts[inputIndex];
         } else {
           input =
-            isCompound && !params.sourceHandle?.startsWith("o")
+            (isCompound && !params.sourceHandle?.startsWith("o") && !isTargetCompound)
               ? source.data.dataIns[inputIndex]
               : source.data.dataOuts[inputIndex];
         }

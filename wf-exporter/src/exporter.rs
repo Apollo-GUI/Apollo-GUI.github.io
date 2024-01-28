@@ -3,7 +3,10 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 
-use crate::{IfDataOut, InternalDataInOrOut, InternalIterator, PropertyOrConstraint, Workflow};
+use crate::{
+    IfDataOut, InternalDataInOrOut, InternalIterator, InternalLoopCounter, PropertyOrConstraint,
+    Workflow,
+};
 
 #[skip_serializing_none]
 #[derive(Serialize, Deserialize, Clone)]
@@ -99,14 +102,18 @@ enum ExportedFunction {
     ParallelFor {
         #[serde(flatten)]
         node: Node,
-        iterators: Vec<String>,
+        iterators: Option<Vec<String>>,
+        #[serde(rename = "loopCounter")]
+        loop_counter: Option<LoopCounter>,
         #[serde(rename = "loopBody")]
         loop_body: Vec<ExportedFunction>,
     },
+    #[serde(rename = "while")]
     SequentialWhile {
         #[serde(flatten)]
         node: Node,
         condition: Vec<Condition>,
+        #[serde(rename = "loopBody")]
         loop_body: Vec<ExportedFunction>,
     },
     SequentialFor {
@@ -114,6 +121,7 @@ enum ExportedFunction {
         node: Node,
         data_loops: Vec<DataLoop>,
         loop_counter: LoopCounter,
+        #[serde(rename = "loopBody")]
         loop_body: Vec<ExportedFunction>,
     },
     StartOrEnd,
@@ -133,7 +141,8 @@ enum Function {
     // Switch {
     // },
     ParallelFor {
-        iterators: Vec<String>,
+        iterators: Option<Vec<String>>,
+        loop_counter: Option<InternalLoopCounter>,
         internal_iterators: Vec<InternalIterator>,
     },
     SequentialWhile {
@@ -158,12 +167,13 @@ struct DataLoop {
     constraints: Vec<PropertyOrConstraint>,
 }
 
+#[skip_serializing_none]
 #[derive(Serialize, Deserialize, Clone)]
 struct LoopCounter {
-    name: String,
+    name: Option<String>,
     #[serde(rename = "type")]
     typ: String,
-    from: String,
+    from: Option<String>,
     to: String,
     step: String,
 }
@@ -220,13 +230,13 @@ fn parse_sub_flow(
         let new_node = Node {
             data_ins: node.internal_data_ins.as_ref().map(|d| {
                 d.iter()
-                    .map(|d| get_data_input(d, node.id.clone(), &node_map))
+                    .map(|d| get_data_input(d, node.id.clone(), &node_map, &edge_map))
                     .collect()
             }),
 
             data_outs: node.internal_data_outs.as_ref().map(|d| {
                 d.iter()
-                    .map(|d| get_data_input(d, node.id.clone(), &node_map))
+                    .map(|d| get_data_input(d, node.id.clone(), &node_map, &edge_map))
                     .collect()
             }),
             ..(*node).clone()
@@ -250,7 +260,7 @@ fn parse_sub_flow(
                         edge_map,
                         children_map,
                         dependency_count_map,
-                        node.parent_id.clone(),
+                        Some(node.id.clone()),
                     ));
                 }
 
@@ -261,7 +271,7 @@ fn parse_sub_flow(
                         edge_map,
                         children_map,
                         dependency_count_map,
-                        node.parent_id.clone(),
+                        Some(node.id.clone()),
                     ));
                 }
                 res.push(ExportedFunction::IfThenElse {
@@ -305,8 +315,15 @@ fn parse_sub_flow(
                     or_else: false_branch,
                 })
             }
-            Function::ParallelFor { iterators, .. } => {
+            Function::ParallelFor {
+                iterators,
+                loop_counter,
+                ..
+            } => {
                 if let Some(children) = children_map.get(node.id.as_str()) {
+                    let loop_counter_mode =
+                        loop_counter.clone().map(|lc| lc.enabled).unwrap_or(false);
+
                     res.push(ExportedFunction::ParallelFor {
                         node: new_node,
                         loop_body: parse_sub_flow(
@@ -315,9 +332,20 @@ fn parse_sub_flow(
                             edge_map,
                             children_map,
                             dependency_count_map,
-                            node.parent_id.clone(),
+                            Some(node.id.clone()),
                         ),
-                        iterators,
+                        iterators: if loop_counter_mode { None } else { iterators },
+                        loop_counter: if loop_counter_mode {
+                            loop_counter.map(|lc| LoopCounter {
+                                name: None,
+                                typ: lc.typ,
+                                from: None,
+                                to: lc.to.unwrap_or("".to_string()),
+                                step: lc.step.unwrap_or("".to_string()),
+                            })
+                        } else {
+                            None
+                        },
                     })
                 }
             }
@@ -331,7 +359,7 @@ fn parse_sub_flow(
                             edge_map,
                             children_map,
                             dependency_count_map,
-                            node.parent_id.clone(),
+                            Some(node.id.clone()),
                         ),
                         condition,
                     })
@@ -379,6 +407,7 @@ fn get_data_input(
     data: &InternalDataInOrOut,
     node_id: String,
     node_map: &HashMap<String, Node>,
+    edge_map: &HashMap<String, Vec<&Node>>,
 ) -> DataInOrOut {
     let actual_name = data
         .rename
@@ -400,6 +429,7 @@ fn get_data_input(
             let current_node = node_map.get(&node_id).expect("current node not found");
 
             if let Some(Node {
+                id,
                 name,
                 internal_data_ins,
                 function:
@@ -414,40 +444,54 @@ fn get_data_input(
                 .clone()
                 .map(|c| node_map.get(&c).expect("parent not found"))
             {
-                if let Some(Some(parent_input)) = internal_data_ins
-                    .as_ref()
-                    .map(|i| i.iter().find(|di| di.id == data.id))
+                if edge_map
+                    .get(id)
+                    .unwrap_or(&vec![])
+                    .iter()
+                    .any(|n| n.id == current_node.id)
                 {
-                    let parent_in_name = parent_input
-                        .rename
-                        .clone()
-                        .unwrap_or(parent_input.name.clone().unwrap_or("".to_string()));
+                    if let Some(Some(parent_input)) = internal_data_ins
+                        .as_ref()
+                        .map(|i| i.iter().find(|di| di.id == data.id))
+                    {
+                        let parent_in_name = parent_input
+                            .rename
+                            .clone()
+                            .unwrap_or(parent_input.name.clone().unwrap_or("".to_string()));
 
-                    let data_in_type = if iterators.contains(&parent_in_name) {
-                        let iterator = internal_iterators
-                            .iter()
-                            .find(|i| i.name == Some(parent_in_name.clone()))
-                            .unwrap();
-                        iterator.elemnt_type.clone().unwrap_or("string".to_string())
-                    } else {
-                        "string".to_string()
-                    };
+                        let data_in_type = if iterators
+                            .clone()
+                            .unwrap_or(vec![])
+                            .contains(&parent_in_name)
+                        {
+                            let iterator = internal_iterators
+                                .iter()
+                                .find(|i| i.name == Some(parent_in_name.clone()))
+                                .unwrap();
+                            iterator.elemnt_type.clone().unwrap_or("string".to_string())
+                        } else {
+                            "string".to_string()
+                        };
 
-                    return DataInOrOut {
-                        id: data.id.clone(),
-                        name: actual_name,
-                        typ: data_in_type,
-                        source: Some(
-                            name.to_string()
-                                + "/"
-                                + &parent_input
-                                    .clone()
-                                    .rename
-                                    .unwrap_or(parent_input.name.clone().unwrap_or("".to_string())),
-                        ),
-                        properties: data.properties.clone(),
-                        constraints: data.constraints.clone(),
-                    };
+                        return DataInOrOut {
+                            id: data.id.clone(),
+                            name: if data.rename.is_some() {
+                                actual_name
+                            } else {
+                                parent_in_name
+                            },
+                            typ: data_in_type,
+                            source: Some(
+                                name.to_string()
+                                    + "/"
+                                    + &parent_input.clone().rename.unwrap_or(
+                                        parent_input.name.clone().unwrap_or("".to_string()),
+                                    ),
+                            ),
+                            properties: data.properties.clone(),
+                            constraints: data.constraints.clone(),
+                        };
+                    }
                 }
             }
 
@@ -492,11 +536,18 @@ fn get_data_input(
                     .map(|d| {
                         d.iter()
                             .find(|d| *d.id == data.id)
+                            .or_else(|| {
+                                source_node
+                                    .internal_data_ins
+                                    .as_ref()
+                                    .map(|i| i.iter().find(|d| *d.id == data.id))
+                                    .unwrap_or(None)
+                            })
                             .expect("output data not found")
                     })
                     .expect("no data outs found");
 
-                let data_out_name = parent_data_out
+                let mut data_out_name = parent_data_out
                     .map(|p| p.rename.clone())
                     .unwrap_or(None)
                     .unwrap_or(
@@ -518,9 +569,10 @@ fn get_data_input(
                     if let Function::ParallelFor {
                         iterators,
                         internal_iterators,
+                        ..
                     } = &current_node.function
                     {
-                        if iterators.contains(&correct_name) {
+                        if iterators.clone().unwrap_or(vec![]).contains(&correct_name) {
                             let iterator = internal_iterators
                                 .iter()
                                 .find(|i| i.name == Some(correct_name.clone()))
@@ -533,11 +585,40 @@ fn get_data_input(
                         data_out.typ.clone().unwrap_or("string".to_string())
                     }
                 };
+
+                let correct_source_name = if let Some(Node {
+                    name,
+                    internal_data_ins,
+                    function: Function::SequentialWhile { .. },
+                    ..
+                }) = current_node
+                    .parent_id
+                    .clone()
+                    .map(|c| node_map.get(&c).expect("parent not found"))
+                {
+                    if let Some(Some(parent_input)) = internal_data_ins
+                        .as_ref()
+                        .map(|i| i.iter().find(|di| di.id == data.id))
+                    {
+                        data_out_name = parent_input.clone().rename.unwrap_or(
+                            parent_input
+                                .name
+                                .clone()
+                                .unwrap_or(data_out_name.to_string()),
+                        );
+                        name.clone()
+                    } else {
+                        source_parent.name.clone()
+                    }
+                } else {
+                    source_parent.name.clone()
+                };
+
                 DataInOrOut {
                     id: data.id.clone(),
                     name: correct_name,
                     typ: data_type,
-                    source: Some(source_parent.name.clone() + "/" + &data_out_name),
+                    source: Some(correct_source_name + "/" + &data_out_name),
                     properties: data.properties.clone(),
                     constraints: data.constraints.clone(),
                 }
@@ -591,24 +672,20 @@ pub fn export_from_flow(workflow: Workflow) -> ApolloYaml {
                                 data2: c.data2.clone(),
                                 typ: c.typ.clone().unwrap_or("string".to_string()),
                                 operator: c.operator.clone(),
-                                negation: c.negation.clone().unwrap_or("false".to_string()),
+                                negation: c.negation.clone().unwrap_or(false).to_string(),
                                 combined_with: c.combined_with.clone().unwrap_or("or".to_string()),
                             })
                             .collect(),
                         if_data_outs: node.data.if_data_outs,
                     },
                     "parallel" => Function::ParallelFor {
-                        iterators: node
-                            .data
-                            .iterators
-                            .clone()
-                            .map(|o| {
-                                o.iter()
-                                    .map(|i| i.name.clone().unwrap_or("".to_string()))
-                                    .collect()
-                            })
-                            .unwrap_or(vec![]),
+                        iterators: node.data.iterators.clone().map(|o| {
+                            o.iter()
+                                .map(|i| i.name.clone().unwrap_or("".to_string()))
+                                .collect()
+                        }),
                         internal_iterators: node.data.iterators.unwrap_or(vec![]),
+                        loop_counter: node.data.loop_counter,
                     },
                     "while" => Function::SequentialWhile {
                         condition: node
@@ -621,7 +698,7 @@ pub fn export_from_flow(workflow: Workflow) -> ApolloYaml {
                                 data2: c.data2.clone(),
                                 typ: c.typ.clone().unwrap_or("string".to_string()),
                                 operator: c.operator.clone(),
-                                negation: c.negation.clone().unwrap_or("false".to_string()),
+                                negation: c.negation.clone().unwrap_or(false).to_string(),
                                 combined_with: c.combined_with.clone().unwrap_or("or".to_string()),
                             })
                             .collect(),
@@ -647,7 +724,7 @@ pub fn export_from_flow(workflow: Workflow) -> ApolloYaml {
 
         if let Some(..) = node_map.get(&edge_name) {
             if edge.source_handle.starts_with("i") {
-                continue;
+                // continue;
             }
         }
 
@@ -678,7 +755,7 @@ pub fn export_from_flow(workflow: Workflow) -> ApolloYaml {
         name: workflow.name,
         data_ins: start_node.internal_data_outs.as_ref().map(|d| {
             d.iter()
-                .map(|d| get_data_input(d, start_node.id.clone(), &node_map))
+                .map(|d| get_data_input(d, start_node.id.clone(), &node_map, &edge_map))
                 .collect()
         }),
         workflow_body: parse_sub_flow(
@@ -691,7 +768,7 @@ pub fn export_from_flow(workflow: Workflow) -> ApolloYaml {
         ),
         data_outs: end_node.internal_data_ins.as_ref().map(|d| {
             d.iter()
-                .map(|d| get_data_input(d, end_node.id.clone(), &node_map))
+                .map(|d| get_data_input(d, end_node.id.clone(), &node_map, &edge_map))
                 .collect()
         }),
         sub_fcs: None,

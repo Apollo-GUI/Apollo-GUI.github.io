@@ -5,7 +5,7 @@ import { ReactFlowProvider } from "reactflow";
 import Home from "./home";
 import { useEffect, useState } from "react";
 import { Workflow } from "./types";
-import { WORKFLOW_KEY_PREFIX } from "@/lib/helpers";
+import { WORKFLOW_KEY_PREFIX, uuidv4 } from "@/lib/helpers";
 
 function App() {
   const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(
@@ -20,8 +20,12 @@ function App() {
   }, []);
 
   const selectWorkflow = (workflow: Workflow | null) => {
-    history.pushState({}, "", "/" + (workflow?.id ?? ""));
-    setSelectedWorkflow(workflow);
+    let wf = workflow;
+    if (workflow && !workflow?.id) {
+      wf = { ...workflow, id: WORKFLOW_KEY_PREFIX + uuidv4() };
+    }
+    history.pushState({}, "", "/" + (wf?.id ?? ""));
+    setSelectedWorkflow(wf);
   };
 
   return selectedWorkflow ? (
